@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^14.4.3",
     "feather-icons": "^4.29.0",
     "framer-motion": "^7.3.2",
+    "google-reviews-widget": "^1.0.4",
     "react": "^18.0.0",
     "react-anchor-link-smooth-scroll": "^1.0.12",
     "react-dom": "^18.0.0",
@@ -23,11 +24,13 @@
     "twin.macro": "^3.0.0-rc.4"
   },
   "scripts": {
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "yarn build && netlify deploy --prod --dir=build"
+    "deploy": "npm run build && netlify deploy --prod",
+    "convert-heic": "node scripts/convert-heic-to-web.js",
+    "sync-icon-colors": "node scripts/sync-icon-colors-to-primary.js"
   },
   "eslintConfig": {
     "extends": "react-app",
@@ -53,5 +56,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "heic-convert": "^2.1.0",
+    "sharp": "^0.34.5"
   }
 }

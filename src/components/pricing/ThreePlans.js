@@ -23,13 +23,8 @@ const Plan = styled.div`
   ${props =>
     props.featured &&
     css`
-      background: rgb(100,21,255);
-      background: linear-gradient(135deg, rgba(100,21,255,1) 0%, rgba(128,64,252,1) 100%);
-background: rgb(85,60,154);
-background: linear-gradient(135deg, rgba(85,60,154,1) 0%, rgba(128,90,213,1) 100%);
-background: rgb(76,81,191);
-background: linear-gradient(135deg, rgba(76,81,191,1) 0%, rgba(102,126,234,1) 100%);
-      ${tw`bg-primary-500 text-gray-100`}
+      background: linear-gradient(135deg, #6d0809 0%, #d41012 45%, #be0e10 100%);
+      ${tw`text-gray-100`}
       .planHighlight {
         ${tw`hidden`}
       }
@@ -37,13 +32,21 @@ background: linear-gradient(135deg, rgba(76,81,191,1) 0%, rgba(102,126,234,1) 10
         ${tw`text-gray-200!`}
       }
       ${PlanFeatures} {
-        ${tw`border-indigo-500`}
+        ${tw`border-white border-opacity-25`}
+      }
+      .mainFeature {
+        ${tw`text-white!`}
+      }
+      .plan-header .name,
+      .plan-header .price {
+        ${tw`text-white!`}
       }
       .feature:not(.mainFeature) {
-        ${tw`text-gray-300!`}
+        ${tw`text-gray-200!`}
       }
       ${BuyNowButton} {
-        ${tw`bg-gray-100 text-primary-500 hocus:bg-gray-300 hocus:text-primary-800`}
+        ${tw`bg-white text-primary-600 hocus:bg-gray-100 hocus:text-primary-900`}
+      }
     `}
 `;
 
@@ -78,7 +81,10 @@ const BuyNowButton = styled(PrimaryButtonBase)`
 `;
 
 const DecoratorBlob = styled(SvgDecoratorBlob)`
-  ${tw`pointer-events-none -z-20 absolute left-0 bottom-0 h-64 w-64 opacity-25 transform -translate-x-1/2 translate-y-1/2`}
+  ${tw`pointer-events-none -z-20 absolute left-0 bottom-0 h-64 w-64 opacity-25 transform -translate-x-1/2 translate-y-1/2 text-primary-100`}
+  path {
+    fill: #fee2e2;
+  }
 `;
 
 
@@ -116,23 +122,21 @@ export default ({
 
   if (!plans) plans = defaultPlans;
 
+  /* Franjas y botones: solo rojo ECK (primary) + negro en gradientes */
   const highlightGradientsCss = [
     css`
-      background: rgb(56, 178, 172);
-      background: linear-gradient(115deg, rgba(56, 178, 172, 1) 0%, rgba(129, 230, 217, 1) 100%);
+      background: linear-gradient(115deg, #830a0b 0%, #d41012 55%, #ef5153 100%);
     `,
     css`
-      background: rgb(56, 178, 172);
-      background-image: linear-gradient(115deg, #6415ff, #7431ff, #8244ff, #8e56ff, #9a66ff);
+      background: linear-gradient(115deg, #9f0c0e 0%, #d41012 50%, #be0e10 100%);
     `,
     css`
-      background: rgb(245, 101, 101);
-      background: linear-gradient(115deg, rgba(245, 101, 101, 1) 0%, rgba(254, 178, 178, 1) 100%);
-    `
+      background: linear-gradient(115deg, #6d0809 0%, #d41012 45%, #ef5153 100%);
+    `,
   ];
 
   return (
-    <Container>
+    <Container id="pricing">
       <ContentWithPaddingXl>
         <HeaderContainer>
           {subheading && <Subheading>{subheading}</Subheading>}
@@ -143,7 +147,7 @@ export default ({
           {plans.map((plan, index) => (
             <Plan key={index} featured={plan.featured}>
               {!plan.featured && <div className="planHighlight" css={highlightGradientsCss[index % highlightGradientsCss.length]} />}
-              <PlanHeader>
+              <PlanHeader className="plan-header">
                 <span className="name">{plan.name}</span>
                 <span className="price">{plan.price}</span>
                 <span className="duration">{plan.duration}</span>

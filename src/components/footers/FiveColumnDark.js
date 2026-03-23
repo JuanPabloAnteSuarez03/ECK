@@ -38,8 +38,32 @@ const CopyrightAndCompanyInfoRow = tw.div`pb-0 text-sm font-normal flex flex-col
 const CopyrightNotice = tw.div``
 const CompanyInfo = tw.div``
 
-const Divider = tw.div`my-8 border-b-2 border-gray-800`
-export default () => {
+const Divider = tw.div`my-8 border-b-2 border-gray-800`;
+
+const defaultFooterLabels = {
+  address: "New Brunswick, Canada",
+  quickLinks: "Quick Links",
+  racing: "Racing",
+  legal: "Legal",
+  contact: "Contact",
+  home: "Home",
+  ourKarts: "Our Karts",
+  prices: "Prices",
+  faq: "FAQ",
+  kartRentals: "Kart Rentals",
+  minigp: "Mini Grand Prix",
+  birthdays: "Birthday Parties",
+  corporate: "Corporate Events",
+  privacy: "Privacy Policy",
+  terms: "Terms of Service",
+  waiver: "Waiver",
+  directions: "Get Directions",
+  copyright: "© 2025 ECK Racing. All Rights Reserved.",
+  tagline: "The fastest outdoor go-kart track in New Brunswick.",
+};
+
+export default ({ footerLabels = null }) => {
+  const L = { ...defaultFooterLabels, ...footerLabels };
   return (
     <Container>
       <Content>
@@ -49,7 +73,7 @@ export default () => {
               <LogoImg src={LogoImage} alt="ECK logo" />
             </LogoContainer>
             <CompanyAddress>
-              New Brunswick, Canada
+              {L.address}
             </CompanyAddress>
             <SocialLinksContainer>
               <SocialLink href="https://facebook.com">
@@ -64,55 +88,55 @@ export default () => {
             </SocialLinksContainer>
           </CompanyColumn>
           <Column>
-            <ColumnHeading>Quick Links</ColumnHeading>
+            <ColumnHeading>{L.quickLinks}</ColumnHeading>
             <LinkList>
               <LinkListItem>
-                <Link href="#walkIn">Home</Link>
+                <Link href="#home">{L.home}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#karts">Our Karts</Link>
+                <Link href="#karts">{L.ourKarts}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#pricing">Prices</Link>
+                <Link href="#pricing">{L.prices}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#faq">FAQ</Link>
+                <Link href="#faq">{L.faq}</Link>
               </LinkListItem>
             </LinkList>
           </Column>
           <Column>
-            <ColumnHeading>Racing</ColumnHeading>
+            <ColumnHeading>{L.racing}</ColumnHeading>
             <LinkList>
               <LinkListItem>
-                <Link href="#racing">Kart Rentals</Link>
+                <Link href="#racing">{L.kartRentals}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#minigp">Mini Grand Prix</Link>
+                <Link href="#minigp">{L.minigp}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#racing">Birthday Parties</Link>
+                <Link href="#racing">{L.birthdays}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#racing">Corporate Events</Link>
+                <Link href="#racing">{L.corporate}</Link>
               </LinkListItem>
             </LinkList>
           </Column>
           <Column>
-            <ColumnHeading>Legal</ColumnHeading>
+            <ColumnHeading>{L.legal}</ColumnHeading>
             <LinkList>
               <LinkListItem>
-                <Link href="#">Privacy Policy</Link>
+                <Link href="#">{L.privacy}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#">Terms of Service</Link>
+                <Link href="#">{L.terms}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#">Waiver</Link>
+                <Link href="#">{L.waiver}</Link>
               </LinkListItem>
             </LinkList>
           </Column>
           <Column>
-            <ColumnHeading>Contact</ColumnHeading>
+            <ColumnHeading>{L.contact}</ColumnHeading>
             <LinkList>
               <LinkListItem>
                 +1 (506) 555-0123
@@ -121,15 +145,15 @@ export default () => {
                 <Link href="mailto:info@eckracing.com">info@eckracing.com</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#contact">Get Directions</Link>
+                <Link href="#contact">{L.directions}</Link>
               </LinkListItem>
             </LinkList>
           </Column>
         </FiveColumns>
         <Divider/>
         <CopyrightAndCompanyInfoRow>
-          <CopyrightNotice>&copy; 2025 ECK Racing. All Rights Reserved.</CopyrightNotice>
-          <CompanyInfo>The fastest outdoor go-kart track in New Brunswick.</CompanyInfo>
+          <CopyrightNotice>{L.copyright}</CopyrightNotice>
+          <CompanyInfo>{L.tagline}</CompanyInfo>
         </CopyrightAndCompanyInfoRow>
       </Content>
     </Container>

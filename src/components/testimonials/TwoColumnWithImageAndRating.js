@@ -29,7 +29,7 @@ const Subheading = tw(SubheadingBase)`text-center md:text-left`;
 const Heading = tw(
   SectionHeading
 )`mt-4 font-black text-left text-3xl sm:text-4xl lg:text-5xl text-center md:text-left leading-tight`;
-const Description = tw.p`mt-6 text-center md:text-left text-sm md:text-base lg:text-lg font-medium leading-relaxed text-secondary-100`;
+const Description = tw.div`mt-6 text-center md:text-left text-sm md:text-base lg:text-lg font-medium leading-relaxed text-secondary-100`;
 
 const TestimonialSlider = styled(Slider)`
   ${tw`w-full mt-10 text-center md:text-left`}
@@ -77,6 +77,7 @@ export default ({
   heading = "Our Clients Love Us.",
   description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam.",
   textOnLeft = false,
+  sliderKey = "testimonials",
   testimonials = [
     {
       stars: 5,
@@ -113,7 +114,7 @@ export default ({
             <Subheading>{subheading}</Subheading>
             <Heading>{heading}</Heading>
             <Description>{description}</Description>
-            <TestimonialSlider arrows={false} ref={setSliderRef}>
+            <TestimonialSlider key={sliderKey} arrows={false} ref={setSliderRef}>
               {testimonials.map((testimonial, index) => (
                 <Testimonial key={index}>
                   <StarsContainer>

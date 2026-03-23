@@ -2,6 +2,7 @@ import React from "react";
 import tw from "twin.macro";
 import { css } from "styled-components/macro"; //eslint-disable-line
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
+import { useI18n } from "context/LanguageContext.js";
 
 // --- COMPONENTS ---
 import Hero from "components/hero/BackgroundAsImageWithCenteredContent.js";
@@ -10,219 +11,290 @@ import KartSpecs from "components/features/TwoColSingleFeatureWithStats.js";
 import RacingOptions from "components/features/DashedBorderSixFeatures.js";
 import Pricing from "components/pricing/ThreePlans.js";
 import MiniGrandPrix from "components/features/TwoColWithSteps.js";
-import VideoSection from "components/features/TwoColWithButton.js";
-import Testimonial from "components/testimonials/TwoColumnWithImageAndRating.js";
+import EckVideoExperience from "components/features/EckVideoExperience.js";
+import EckBeaverReviewsSection from "components/testimonials/EckBeaverReviewsSection.js";
 import FAQ from "components/faqs/SingleCol.js";
 import ContactUs from "components/forms/TwoColContactUsWithIllustrationFullForm.js";
 import FinalCTA from "components/cta/GetStarted.js";
 import Footer from "components/footers/FiveColumnDark.js";
 
+import FastIconImage from "images/fast-icon.svg";
+import CustomizeIconImage from "images/customize-icon.svg";
+import ShieldIconImage from "images/shield-icon.svg";
+import StarIconImage from "images/star-icon.svg";
+
 const HighlightedText = tw.span`text-primary-500`;
 const Subheading = tw.span`uppercase tracking-widest font-bold text-primary-500`;
 
-export default () => {
+export default function ServiceLandingPage() {
+  const { t } = useI18n();
+
+  const kartHeading = (
+    <>
+      {t("karts.headingBefore")}
+      <span tw="text-primary-500">{t("karts.headingAccent")}</span>
+    </>
+  );
+
+  const kartStats = [
+    { key: t("karts.stat.topSpeed"), value: "70 km/h" },
+    { key: t("karts.stat.model"), value: "Sodi RT8" },
+    { key: t("karts.stat.engine"), value: "390cc" },
+    { key: t("karts.stat.timing"), value: "AMB/MyLaps" },
+  ];
+
+  const racingHeading = (
+    <>
+      {t("racing.headingBefore")}
+      <span tw="text-primary-500">{t("racing.headingAccent")}</span>
+    </>
+  );
+
+  const racingCards = [
+    {
+      imageSrc: FastIconImage,
+      title: t("racing.card1.title"),
+      description: t("racing.card1.description"),
+    },
+    {
+      imageSrc: CustomizeIconImage,
+      title: t("racing.card2.title"),
+      description: t("racing.card2.description"),
+    },
+    {
+      imageSrc: ShieldIconImage,
+      title: t("racing.card3.title"),
+      description: t("racing.card3.description"),
+    },
+    {
+      imageSrc: StarIconImage,
+      title: t("racing.card4.title"),
+      description: t("racing.card4.description"),
+    },
+  ];
+
+  const pricingPlans = [
+    {
+      name: t("pricing.sprint.name"),
+      price: "$25",
+      duration: t("pricing.sprint.duration"),
+      mainFeature: t("pricing.sprint.main"),
+      features: [
+        t("pricing.sprint.f1"),
+        t("pricing.sprint.f2"),
+        t("pricing.sprint.f3"),
+        t("pricing.sprint.f4"),
+      ],
+    },
+    {
+      name: t("pricing.gp.name"),
+      price: "$40",
+      duration: t("pricing.gp.duration"),
+      mainFeature: t("pricing.gp.main"),
+      features: [
+        t("pricing.gp.f1"),
+        t("pricing.gp.f2"),
+        t("pricing.gp.f3"),
+        t("pricing.gp.f4"),
+      ],
+      featured: true,
+    },
+    {
+      name: t("pricing.endurance.name"),
+      price: "$55",
+      duration: t("pricing.endurance.duration"),
+      mainFeature: t("pricing.endurance.main"),
+      features: [
+        t("pricing.endurance.f1"),
+        t("pricing.endurance.f2"),
+        t("pricing.endurance.f3"),
+        t("pricing.endurance.f4"),
+      ],
+    },
+  ];
+
+  const miniGpHeading = (
+    <>
+      {t("minigp.headingBefore")}
+      <HighlightedText>{t("minigp.headingAccent")}</HighlightedText>
+    </>
+  );
+
+  const videoHeading = (
+    <>
+      {t("video.headingBefore")}
+      <HighlightedText>{t("video.headingAccent")}</HighlightedText>
+      {t("video.headingAfter")}
+    </>
+  );
+
+  const videoItems = [
+    {
+      id: "6wJ-F-zxMXw",
+      title: `ECK — ${t("video.caption1")}`,
+      caption: t("video.caption1"),
+    },
+    {
+      id: "STnRTJ4jdzM",
+      title: `ECK — ${t("video.caption2")}`,
+      caption: t("video.caption2"),
+    },
+  ];
+
+  const reviewsHeading = (
+    <>
+      {t("reviews.headingBefore")}
+      <HighlightedText>{t("reviews.headingAccent")}</HighlightedText>
+    </>
+  );
+
+  const faqHeading = (
+    <>
+      {t("faq.headingBefore")}
+      <HighlightedText>{t("faq.headingAccent")}</HighlightedText>
+    </>
+  );
+
+  const faqItems = [
+    { question: t("faq.q1"), answer: t("faq.a1") },
+    { question: t("faq.q2"), answer: t("faq.a2") },
+    { question: t("faq.q3"), answer: t("faq.a3") },
+    { question: t("faq.q4"), answer: t("faq.a4") },
+    { question: t("faq.q5"), answer: t("faq.a5") },
+    { question: t("faq.q6"), answer: t("faq.a6") },
+  ];
+
+  const contactHeading = (
+    <>
+      {t("contact.headingBefore")}
+      <HighlightedText>{t("contact.headingAccent")}</HighlightedText>
+    </>
+  );
+
+  const footerLabels = {
+    address: t("footer.address"),
+    quickLinks: t("footer.quickLinks"),
+    racing: t("footer.racing"),
+    legal: t("footer.legal"),
+    contact: t("footer.contact"),
+    home: t("footer.home"),
+    ourKarts: t("footer.ourKarts"),
+    prices: t("footer.prices"),
+    faq: t("footer.faq"),
+    kartRentals: t("footer.kartRentals"),
+    minigp: t("footer.minigp"),
+    birthdays: t("footer.birthdays"),
+    corporate: t("footer.corporate"),
+    privacy: t("footer.privacy"),
+    terms: t("footer.terms"),
+    waiver: t("footer.waiver"),
+    directions: t("footer.directions"),
+    copyright: t("footer.copyright"),
+    tagline: t("footer.tagline"),
+  };
+
+  const pricingHeading = (
+    <>
+      {t("pricing.headingBefore")}
+      <HighlightedText>{t("pricing.headingAccent")}</HighlightedText>
+    </>
+  );
+
   return (
     <AnimationRevealPage>
-
-      {/* ============================================ */}
-      {/* 1 + 3. HEADER + HERO SECTION                */}
-      {/* Full-screen background image with nav        */}
-      {/* ============================================ */}
       <Hero />
 
-      {/* ============================================ */}
-      {/* 2. WALK-IN STATUS BAR                        */}
-      {/* Red banner with quick racing info            */}
-      {/* ============================================ */}
       <FeatureStats
         subheading=""
-        heading="Walk-In Racing Today"
-        description="First come, first served. No reservation required. Just show up and race!"
+        heading={t("walkIn.heading")}
+        description={t("walkIn.description")}
         stats={[
-          { key: "Today's Hours", value: "3–9 PM" },
-          { key: "Status", value: "OPEN" },
-          { key: "Min. Age", value: "8+" },
+          { key: t("walkIn.hours"), value: "3–9 PM" },
+          { key: t("walkIn.status"), value: t("walkIn.open") },
+          { key: t("walkIn.age"), value: "8+" },
         ]}
       />
 
-      {/* ============================================ */}
-      {/* 4. OUR KARTS — Sodi World Series             */}
-      {/* Image + specifications with stats            */}
-      {/* ============================================ */}
       <KartSpecs
         textOnLeft={false}
+        heading={kartHeading}
+        description={t("karts.description")}
+        statistics={kartStats}
       />
 
-      {/* ============================================ */}
-      {/* 5. RACING OPTIONS                            */}
-      {/* Cards for each experience available          */}
-      {/* ============================================ */}
-      <RacingOptions />
+      <RacingOptions cards={racingCards} heading={racingHeading} />
 
-      {/* ============================================ */}
-      {/* 6. PRICING                                   */}
-      {/* 3 race duration cards                        */}
-      {/* ============================================ */}
       <Pricing
-        subheading={<Subheading>Pricing</Subheading>}
-        heading={<>Simple & Transparent <HighlightedText>Race Pricing</HighlightedText></>}
-        description="Choose your race duration. All prices include kart rental, helmet, and full safety briefing."
-        plans={[
-          {
-            name: "Sprint",
-            price: "$25",
-            duration: "10 Minutes",
-            mainFeature: "Quick Adrenaline Rush",
-            features: ["Kart & Helmet Included", "Safety Briefing", "Lap Timing", "Walk-In Available"],
-          },
-          {
-            name: "Grand Prix",
-            price: "$40",
-            duration: "20 Minutes",
-            mainFeature: "Most Popular Choice",
-            features: ["Kart & Helmet Included", "Safety Briefing", "Lap Timing", "Printable Results"],
-            featured: true,
-          },
-          {
-            name: "Endurance",
-            price: "$55",
-            duration: "30 Minutes",
-            mainFeature: "Ultimate Racing Experience",
-            features: ["Kart & Helmet Included", "Safety Briefing", "Lap Timing", "Printable Results"],
-          },
-        ]}
-        primaryButtonText="Book Now"
+        subheading={<Subheading>{t("pricing.subheading")}</Subheading>}
+        heading={pricingHeading}
+        description={t("pricing.description")}
+        plans={pricingPlans}
+        primaryButtonText={t("pricing.book")}
       />
 
-      {/* ============================================ */}
-      {/* 7. MINI GRAND PRIX — Reservation Section     */}
-      {/* Steps: Practice → Qualifying → Final Race    */}
-      {/* ============================================ */}
       <MiniGrandPrix
-        subheading={<Subheading>Mini Grand Prix</Subheading>}
-        heading={<>The Ultimate <HighlightedText>Racing Event</HighlightedText></>}
+        sectionId="minigp"
+        iconsOnly
+        subheading={<Subheading>{t("minigp.subheading")}</Subheading>}
+        heading={miniGpHeading}
         textOnLeft={true}
         steps={[
           {
-            heading: "Practice Session",
-            description: "Get familiar with the track and find your racing line. Learn the corners and build your confidence before the timed sessions.",
+            heading: t("minigp.step1.title"),
+            description: t("minigp.step1.description"),
           },
           {
-            heading: "Qualifying",
-            description: "Set your fastest lap to determine your starting position on the grid. Every millisecond counts!",
-          },
-          {
-            heading: "The Final Race",
-            description: "Lights out and away we go! Compete head-to-head for the podium. Trophies awarded to the top 3 finishers.",
+            heading: t("minigp.step2.title"),
+            description: t("minigp.step2.description"),
           },
         ]}
       />
 
-      {/* ============================================ */}
-      {/* 8. VIDEO EXPERIENCE                          */}
-      {/* Showcase the racing action                   */}
-      {/* ============================================ */}
-      <VideoSection
-        subheading={<Subheading>Experience The Thrill</Subheading>}
-        heading={<>See The <HighlightedText>Action</HighlightedText> On Track</>}
-        description="Watch our drivers push the limits on the fastest outdoor go-kart track in New Brunswick. Feel the speed, hear the engines, and see why ECK is the ultimate karting destination."
+      <EckVideoExperience
+        subheading={<Subheading>{t("video.subheading")}</Subheading>}
+        heading={videoHeading}
+        description={t("video.description")}
         buttonRounded={false}
-        primaryButtonText="Watch The Action"
+        primaryButtonText={t("video.button")}
+        primaryButtonUrl="https://www.youtube.com/watch?v=6wJ-F-zxMXw"
         textOnLeft={false}
+        videos={videoItems}
       />
 
-      {/* ============================================ */}
-      {/* 9. TESTIMONIALS                              */}
-      {/* Customer reviews with star ratings           */}
-      {/* ============================================ */}
-      <Testimonial
-        subheading={<Subheading>Testimonials</Subheading>}
-        heading={<>Our Racers <HighlightedText>Love Us</HighlightedText></>}
-        description="See what our customers have to say about their ECK racing experience."
-        testimonials={[
-          {
-            stars: 5,
-            profileImageSrc: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=3.25&w=512&h=512&q=80",
-            heading: "Best Karting Experience Ever!",
-            quote: "The karts are fast, the track is amazing, and the staff is super friendly. We had an incredible time racing with the whole family. The Sodi karts feel like real race cars. Can't wait to come back!",
-            customerName: "Sarah Johnson",
-            customerTitle: "Google Review ★★★★★",
-          },
-          {
-            stars: 5,
-            profileImageSrc: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2.25&w=512&h=512&q=80",
-            heading: "Perfect for Corporate Events",
-            quote: "We booked ECK for our company team-building event and it was a huge hit. Everyone had a blast competing against each other. The Mini Grand Prix format made it feel like a real championship. Highly recommended!",
-            customerName: "Mike Roberts",
-            customerTitle: "Google Review ★★★★★",
-          },
-        ]}
+      <EckBeaverReviewsSection
+        instanceId="2v92fl0CjmPPaAx2rWEN"
+        subheading={<Subheading>{t("reviews.subheading")}</Subheading>}
+        heading={reviewsHeading}
+        description={t("reviews.description")}
       />
 
-      {/* ============================================ */}
-      {/* 10. FAQ                                      */}
-      {/* Common questions about racing at ECK         */}
-      {/* ============================================ */}
       <FAQ
-        subheading={<Subheading>FAQ</Subheading>}
-        heading={<>Have <HighlightedText>Questions?</HighlightedText></>}
-        description="Everything you need to know before your visit to ECK."
-        faqs={[
-          {
-            question: "What is the minimum age to race?",
-            answer: "Drivers must be at least 8 years old and meet the minimum height requirement to safely operate the karts. Junior karts are available for younger drivers.",
-          },
-          {
-            question: "Do I need a reservation?",
-            answer: "Regular kart races are walk-in and first-come, first-served. No reservation required! Reservations are only needed for the Mini Grand Prix package and group/corporate events.",
-          },
-          {
-            question: "What should I wear?",
-            answer: "Closed-toe shoes are mandatory. We recommend comfortable clothing that you don't mind getting a little dusty. Long hair must be tied back. Helmets are provided.",
-          },
-          {
-            question: "Is it safe?",
-            answer: "Absolutely! All drivers receive a safety briefing before racing. Our karts are equipped with seat belts, bumpers, and roll bars. Track marshals monitor the circuit at all times.",
-          },
-          {
-            question: "How long does a race last?",
-            answer: "We offer 10-minute, 20-minute, and 30-minute race sessions. The Mini Grand Prix event (with practice, qualifying, and final race) lasts approximately 1.5 hours.",
-          },
-          {
-            question: "Can I host a birthday party or corporate event?",
-            answer: "Yes! We offer special packages for birthday parties and corporate events. These include exclusive track time, race formats, and optional catering. Contact us to plan your event.",
-          },
-        ]}
+        subheading={<Subheading>{t("faq.subheading")}</Subheading>}
+        heading={faqHeading}
+        description={t("faq.description")}
+        faqs={faqItems}
       />
 
-      {/* ============================================ */}
-      {/* 11. LOCATION & CONTACT                       */}
-      {/* Contact form + address info                  */}
-      {/* ============================================ */}
       <ContactUs
-        subheading={<Subheading>Contact Us</Subheading>}
-        heading={<>Feel free to <HighlightedText>get in touch</HighlightedText></>}
-        description="Have a question or want to book a group event? Send us a message and we'll get back to you as soon as possible."
-        submitButtonText="Send Message"
+        subheading={<Subheading>{t("contact.subheading")}</Subheading>}
+        heading={contactHeading}
+        description={t("contact.description")}
+        submitButtonText={t("contact.submit")}
+        emailPlaceholder={t("contact.emailPh")}
+        namePlaceholder={t("contact.namePh")}
+        subjectPlaceholder={t("contact.subjectPh")}
+        messagePlaceholder={t("contact.messagePh")}
       />
 
-      {/* ============================================ */}
-      {/* 12. FINAL CTA                                */}
-      {/* Big red call-to-action banner                */}
-      {/* ============================================ */}
       <FinalCTA
-        text="Ready to race? Come experience the fastest outdoor go-kart track in New Brunswick."
-        primaryLinkText="View Prices"
+        text={t("cta.text")}
+        primaryLinkText={t("cta.primary")}
         primaryLinkUrl="#pricing"
-        secondaryLinkText="Contact Us"
+        secondaryLinkText={t("cta.secondary")}
         secondaryLinkUrl="#contact"
       />
 
-      {/* ============================================ */}
-      {/* 13. FOOTER                                   */}
-      {/* Dark footer with ECK branding                */}
-      {/* ============================================ */}
-      <Footer />
+      <Footer footerLabels={footerLabels} />
     </AnimationRevealPage>
   );
-};
+}

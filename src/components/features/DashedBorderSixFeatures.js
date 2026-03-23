@@ -51,35 +51,48 @@ const DecoratorBlob = styled(SvgDecoratorBlob3)`
   ${tw`pointer-events-none absolute right-0 bottom-0 w-64 opacity-25 transform translate-x-32 translate-y-48 `}
 `;
 
-export default () => {
-  const cards = [
-    {
-      imageSrc: FastIconImage,
-      title: "Kart Rentals",
-      description: "Walk-in racing available daily. First come, first served. No reservation needed — just show up and race!"
-    },
-    {
-      imageSrc: CustomizeIconImage,
-      title: "Birthday Parties",
-      description: "Make it a birthday to remember! Exclusive track time, racing, and a celebration your group will never forget."
-    },
-    {
-      imageSrc: ShieldIconImage,
-      title: "Corporate Events",
-      description: "Team building with a competitive edge. Custom race formats, exclusive sessions, and optional catering for your team."
-    },
-    {
-      imageSrc: StarIconImage,
-      title: "Sodi World Series",
-      description: "Join the international karting championship. Compete in official Sodi World Series events right here at ECK."
-    },
-  ];
+const defaultCards = [
+  {
+    imageSrc: FastIconImage,
+    title: "Kart Rentals",
+    description:
+      "Walk-in racing available daily. First come, first served. No reservation needed — just show up and race!",
+  },
+  {
+    imageSrc: CustomizeIconImage,
+    title: "Birthday Parties",
+    description:
+      "Make it a birthday to remember! Exclusive track time, racing, and a celebration your group will never forget.",
+  },
+  {
+    imageSrc: ShieldIconImage,
+    title: "Corporate Events",
+    description:
+      "Team building with a competitive edge. Custom race formats, exclusive sessions, and optional catering for your team.",
+  },
+  {
+    imageSrc: StarIconImage,
+    title: "Sodi World Series",
+    description:
+      "Join the international karting championship. Compete in official Sodi World Series events right here at ECK.",
+  },
+];
+
+export default ({ cards = null, heading = null }) => {
+  const cardList = cards || defaultCards;
+  const headingNode =
+    heading ||
+    (
+      <>
+        Racing <span tw="text-primary-500">Options</span>
+      </>
+    );
 
   return (
     <Container id="racing">
       <ThreeColumnContainer>
-        <Heading>Racing <span tw="text-primary-500">Options</span></Heading>
-        {cards.map((card, i) => (
+        <Heading>{headingNode}</Heading>
+        {cardList.map((card, i) => (
           <Column key={i}>
             <Card>
               <span className="imageContainer">

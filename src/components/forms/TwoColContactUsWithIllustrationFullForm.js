@@ -38,6 +38,10 @@ export default ({
   heading = <>Feel free to <span tw="text-primary-500">get in touch</span><wbr/> with us.</>,
   description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   submitButtonText = "Send",
+  emailPlaceholder = "Your Email Address",
+  namePlaceholder = "Full Name",
+  subjectPlaceholder = "Subject",
+  messagePlaceholder = "Your Message Here",
   formAction = "#",
   formMethod = "get",
   textOnLeft = true,
@@ -45,7 +49,7 @@ export default ({
   // The textOnLeft boolean prop can be used to display either the text on left or right side of the image.
 
   return (
-    <Container>
+    <Container id="contact">
       <TwoColumn>
         <ImageColumn>
           <Image imageSrc={EmailIllustrationSrc} />
@@ -56,10 +60,10 @@ export default ({
             <Heading>{heading}</Heading>
             {description && <Description>{description}</Description>}
             <Form action={formAction} method={formMethod}>
-              <Input type="email" name="email" placeholder="Your Email Address" />
-              <Input type="text" name="name" placeholder="Full Name" />
-              <Input type="text" name="subject" placeholder="Subject" />
-              <Textarea name="message" placeholder="Your Message Here" />
+              <Input type="email" name="email" placeholder={emailPlaceholder} />
+              <Input type="text" name="name" placeholder={namePlaceholder} />
+              <Input type="text" name="subject" placeholder={subjectPlaceholder} />
+              <Textarea name="message" placeholder={messagePlaceholder} />
               <SubmitButton type="submit">{submitButtonText}</SubmitButton>
             </Form>
           </TextContent>
