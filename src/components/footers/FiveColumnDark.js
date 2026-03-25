@@ -76,13 +76,10 @@ export default ({ footerLabels = null }) => {
               {L.address}
             </CompanyAddress>
             <SocialLinksContainer>
-              <SocialLink href="https://facebook.com">
+              <SocialLink href="https://www.facebook.com/profile.php?id=100063772474040">
                 <FacebookIcon />
               </SocialLink>
-              <SocialLink href="https://twitter.com">
-                <TwitterIcon />
-              </SocialLink>
-              <SocialLink href="https://youtube.com">
+              <SocialLink href="https://www.youtube.com/@geraldcaseley6794">
                 <YoutubeIcon />
               </SocialLink>
             </SocialLinksContainer>
@@ -131,7 +128,13 @@ export default ({ footerLabels = null }) => {
                 <Link href="#">{L.terms}</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#">{L.waiver}</Link>
+                <Link 
+                href="https://cakcmp.speedwaiver.com/wdvli" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                >
+                {L.waiver}
+                </Link>
               </LinkListItem>
             </LinkList>
           </Column>
@@ -142,10 +145,16 @@ export default ({ footerLabels = null }) => {
                 +1 (506) 555-0123
               </LinkListItem>
               <LinkListItem>
-                <Link href="mailto:info@eckracing.com">info@eckracing.com</Link>
+                <Link href="mailto:eastcoastkarting@gmail.com">eastcoastkarting@gmail.com</Link>
               </LinkListItem>
               <LinkListItem>
-                <Link href="#contact">{L.directions}</Link>
+                <Link
+                  href="https://maps.app.goo.gl/gscoNXRwUZsrn97H7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                {L.directions}
+                  </Link>
               </LinkListItem>
             </LinkList>
           </Column>
