@@ -76,40 +76,30 @@ export default function ServiceLandingPage() {
   const pricingPlans = [
     {
       name: t("pricing.sprint.name"),
-      price: "$25",
-      duration: t("pricing.sprint.duration"),
-      mainFeature: t("pricing.sprint.main"),
+      price: "",
+      duration: "",
+      mainFeature: "Choose your race time:",
       features: [
-        t("pricing.sprint.f1"),
-        t("pricing.sprint.f2"),
+        "10 Minutes - $27.00 + tax",
+        "20 Minutes - $45.00 + tax",
+        "30 Minutes - $60.00 + tax",
         t("pricing.sprint.f3"),
         t("pricing.sprint.f4"),
       ],
     },
     {
       name: t("pricing.gp.name"),
-      price: "$40",
-      duration: t("pricing.gp.duration"),
-      mainFeature: t("pricing.gp.main"),
+      price: "",
+      duration: "",
+      mainFeature: "$62.00 + tax",
       features: [
+        t("pricing.gp.main"),
         t("pricing.gp.f1"),
         t("pricing.gp.f2"),
         t("pricing.gp.f3"),
         t("pricing.gp.f4"),
       ],
       featured: true,
-    },
-    {
-      name: t("pricing.endurance.name"),
-      price: "$55",
-      duration: t("pricing.endurance.duration"),
-      mainFeature: t("pricing.endurance.main"),
-      features: [
-        t("pricing.endurance.f1"),
-        t("pricing.endurance.f2"),
-        t("pricing.endurance.f3"),
-        t("pricing.endurance.f4"),
-      ],
     },
   ];
 

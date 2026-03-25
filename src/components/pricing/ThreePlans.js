@@ -13,9 +13,9 @@ const Subheading = tw(SubheadingBase)`mb-4`;
 const Heading = tw(SectionHeading)`w-full`;
 const Description = tw(SectionDescription)`w-full text-center`;
 
-const PlansContainer = tw.div`flex justify-between flex-col lg:flex-row items-center lg:items-stretch relative`;
+const PlansContainer = tw.div`flex justify-center flex-col lg:flex-row items-center lg:items-stretch relative gap-8`;
 const Plan = styled.div`
-  ${tw`w-full max-w-sm mt-16 lg:mr-8 lg:last:mr-0 text-center px-8 rounded-lg shadow relative pt-2 text-gray-900 bg-white flex flex-col`}
+  ${tw`w-full max-w-sm mt-16 text-center px-8 rounded-lg shadow relative pt-2 text-gray-900 bg-white flex flex-col`}
   .planHighlight {
     ${tw`rounded-t-lg absolute top-0 inset-x-0 h-2`}
   }
@@ -36,6 +36,7 @@ const Plan = styled.div`
       }
       .mainFeature {
         ${tw`text-white!`}
+        background-color: transparent !important;
       }
       .plan-header .name,
       .plan-header .price {
@@ -53,13 +54,19 @@ const Plan = styled.div`
 const PlanHeader = styled.div`
   ${tw`flex flex-col uppercase leading-relaxed py-8`}
   .name {
-    ${tw`font-bold text-xl`}
+    ${tw`font-bold text-xl mb-4`}
   }
   .price {
     ${tw`font-bold text-4xl sm:text-5xl my-1`}
+    &:empty {
+      display: none;
+    }
   }
   .duration {
     ${tw`text-gray-500 font-bold tracking-widest`}
+    &:empty {
+      display: none;
+    }
   }
 `;
 const PlanFeatures = styled.div`
@@ -71,19 +78,42 @@ const PlanFeatures = styled.div`
     }
   }
   .mainFeature {
-    ${tw`text-xl font-bold tracking-wide`}
+    ${tw`text-3xl font-bold tracking-tight mb-6 py-4 px-4 rounded-lg`}
+    color: #d41012;
+    background-color: rgba(212, 16, 18, 0.08);
   }
 `;
 
 const PlanAction = tw.div`px-4 sm:px-8 xl:px-16 py-8`;
-const BuyNowButton = styled(PrimaryButtonBase)`
-  ${tw`rounded-full uppercase tracking-wider py-4 w-full text-sm hover:shadow-xl transform hocus:translate-x-px hocus:-translate-y-px focus:shadow-outline`}
+const BuyNowButton = styled.a`
+  ${tw`block text-center rounded-full uppercase tracking-wider py-4 w-full text-sm font-bold no-underline transition-all duration-200 hover:shadow-xl transform hover:translate-x-px hover:-translate-y-px`}
+  background-color: #d41012;
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: #b80d0f;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(212, 16, 18, 0.5);
+    outline: none;
+  }
 `;
 
 const DecoratorBlob = styled(SvgDecoratorBlob)`
   ${tw`pointer-events-none -z-20 absolute left-0 bottom-0 h-64 w-64 opacity-25 transform -translate-x-1/2 translate-y-1/2 text-primary-100`}
   path {
     fill: #fee2e2;
+  }
+`;
+
+const WaiverDisclaimer = styled.div`
+  ${tw`w-full text-center mt-12 px-4`}
+  p {
+    ${tw`text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto`}
+  }
+  a {
+    ${tw`text-primary-600 font-semibold underline hover:text-primary-700 transition-colors duration-200`}
   }
 `;
 
@@ -149,8 +179,8 @@ export default ({
               {!plan.featured && <div className="planHighlight" css={highlightGradientsCss[index % highlightGradientsCss.length]} />}
               <PlanHeader className="plan-header">
                 <span className="name">{plan.name}</span>
-                <span className="price">{plan.price}</span>
-                <span className="duration">{plan.duration}</span>
+                {plan.price && <span className="price">{plan.price}</span>}
+                {plan.duration && <span className="duration">{plan.duration}</span>}
               </PlanHeader>
               <PlanFeatures>
                 <span className="feature mainFeature">{plan.mainFeature}</span>
@@ -161,12 +191,21 @@ export default ({
                 ))}
               </PlanFeatures>
               <PlanAction>
-                <BuyNowButton css={!plan.featured && highlightGradientsCss[index]}>{primaryButtonText}</BuyNowButton>
+                <BuyNowButton href="#contact">{primaryButtonText}</BuyNowButton>
               </PlanAction>
             </Plan>
           ))}
           <DecoratorBlob/>
         </PlansContainer>
+        <WaiverDisclaimer>
+          <p>
+            If you are participating in a Mini Grand Prix, you MUST fill out our{" "}
+            <a href="https://cakcmp.speedwaiver.com/wdvli" target="_blank" rel="noopener noreferrer">
+              online waiver
+            </a>
+            {" "}form. You will be asked to show confirmation that you completed the form.
+          </p>
+        </WaiverDisclaimer>
       </ContentWithPaddingXl>
     </Container>
   );
