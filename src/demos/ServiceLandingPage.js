@@ -22,6 +22,9 @@ import FastIconImage from "images/fast-icon.svg";
 import CustomizeIconImage from "images/customize-icon.svg";
 import ShieldIconImage from "images/shield-icon.svg";
 import StarIconImage from "images/star-icon.svg";
+import walkInHelmetIllustration from "images/email-illustration2.svg";
+import ctaKartIllustration from "images/email-illustration3.svg";
+import contactKartIllustration from "images/email-illustration4.svg";
 
 const HighlightedText = tw.span`text-primary-500`;
 const Subheading = tw.span`uppercase tracking-widest font-bold text-primary-500`;
@@ -203,6 +206,8 @@ export default function ServiceLandingPage() {
           { key: t("walkIn.status"), value: t("walkIn.open") },
           { key: t("walkIn.age"), value: "8+" },
         ]}
+        accentIllustrationSrc={walkInHelmetIllustration}
+        accentIllustrationAlt={t("illus.walkIn")}
       />
 
       <KartSpecs
@@ -274,6 +279,8 @@ export default function ServiceLandingPage() {
         namePlaceholder={t("contact.namePh")}
         subjectPlaceholder={t("contact.subjectPh")}
         messagePlaceholder={t("contact.messagePh")}
+        illustrationSrc={contactKartIllustration}
+        illustrationAlt={t("illus.contact")}
       />
 
       <FinalCTA
@@ -282,6 +289,8 @@ export default function ServiceLandingPage() {
         primaryLinkUrl="#pricing"
         secondaryLinkText={t("cta.secondary")}
         secondaryLinkUrl="#contact"
+        decorativeIllustrationSrc={ctaKartIllustration}
+        decorativeIllustrationAlt={t("illus.cta")}
       />
 
       <Footer footerLabels={footerLabels} />

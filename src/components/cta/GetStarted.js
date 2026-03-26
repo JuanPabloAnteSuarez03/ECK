@@ -6,9 +6,16 @@ import { ReactComponent as SvgDecoratorBlob1 } from "images/svg-decorator-blob-9
 import { ContentWithPaddingXl, Container } from "components/misc/Layouts";
 
 const PrimaryBackgroundContainer = tw.div`py-20 lg:py-24 bg-primary-500 rounded-lg relative`
-const Row = tw.div`px-8 max-w-screen-lg mx-auto flex items-center relative z-10 flex-col lg:flex-row text-center lg:text-left`;
+const Row = tw.div`px-8 max-w-screen-lg mx-auto flex items-center relative z-10 flex-col lg:flex-row text-center lg:text-left gap-8 lg:gap-6`;
 
-const ColumnContainer = tw.div`lg:w-1/2 max-w-lg`
+const IllustrationWrap = tw.div`hidden lg:flex flex-shrink-0 w-40 xl:w-48 items-center justify-center`;
+const IllustrationImg = styled.img`
+  ${tw`w-full h-auto object-contain object-center drop-shadow-lg`}
+  max-height: 9rem;
+  opacity: 0.95;
+`;
+
+const ColumnContainer = tw.div`lg:flex-1 lg:min-w-0 max-w-lg mx-auto lg:mx-0`
 const TextContainer = tw(ColumnContainer)``;
 const Text = tw.h5`text-gray-100 text-2xl sm:text-3xl font-bold`;
 
@@ -28,13 +35,20 @@ export default ({
   primaryLinkUrl = "http://timerse.com",
   secondaryLinkText = "Contact Us",
   secondaryLinkUrl = "http://google.com",
-  pushDownFooter = true
+  pushDownFooter = true,
+  decorativeIllustrationSrc = null,
+  decorativeIllustrationAlt = "",
 }) => {
   return (
     <Container css={pushDownFooter && tw`mb-20 lg:mb-24`}>
       <ContentWithPaddingXl>
       <PrimaryBackgroundContainer>
         <Row>
+          {decorativeIllustrationSrc && (
+            <IllustrationWrap>
+              <IllustrationImg src={decorativeIllustrationSrc} alt={decorativeIllustrationAlt} loading="lazy" decoding="async" />
+            </IllustrationWrap>
+          )}
           <TextContainer>
             <Text>{text}</Text>
           </TextContainer>

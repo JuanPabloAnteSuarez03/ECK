@@ -135,6 +135,10 @@ export const translations = {
     "faq.a6":
       "Yes! We offer special packages for birthday parties and corporate events. These include exclusive track time, race formats, and optional catering. Contact us to plan your event.",
 
+    "illus.walkIn": "Racing helmet illustration",
+    "illus.cta": "Side view of a go-kart",
+    "illus.contact": "Driver in a go-kart ready to race",
+
     "contact.subheading": "Contact Us",
     "contact.headingBefore": "Feel free to ",
     "contact.headingAccent": "get in touch",
@@ -304,6 +308,10 @@ export const translations = {
     "faq.q6": "Anniversaire ou événement d'entreprise ?",
     "faq.a6":
       "Oui ! Forfaits anniversaire et entreprise : piste en exclusivité, formats sur mesure, restauration en option. Contactez-nous.",
+
+    "illus.walkIn": "Illustration d'un casque de course",
+    "illus.cta": "Vue latérale d'un kart",
+    "illus.contact": "Pilote en kart prêt à rouler",
 
     "contact.subheading": "Contact",
     "contact.headingBefore": "N'hésitez pas à ",

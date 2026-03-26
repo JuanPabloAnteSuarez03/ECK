@@ -1,95 +1,58 @@
-# Configuración del servidor de emails SEGURO
+# Formulario de contacto (Vercel Serverless)
 
-El formulario usa un **servidor Node.js seguro** con:
-- ✅ Variables de entorno (credenciales protegidas)
-- ✅ Rate limiting (evita spam/ataques)
-- ✅ Validación de datos
-- ✅ CORS restringido
-- ✅ Emails ilimitados
+El envío del formulario usa la **función serverless** `api/send-email.js` en el mismo proyecto. Las credenciales viven solo en variables de entorno; el cliente solo hace `POST` a `/api/send-email`.
 
-## Pasos para configurar:
+## 1. Contraseña de aplicación de Gmail
 
-### 1. Habilitar "App Passwords" en Gmail
+Necesitas una **contraseña de aplicación** (no tu contraseña normal):
 
-**Necesitas una "contraseña de aplicación"** (no tu contraseña normal):
+1. https://myaccount.google.com/security
+2. Activa la **verificación en 2 pasos** si aún no la tienes.
+3. **Contraseñas de aplicaciones** → dispositivo **Mail**, sistema **Windows** (o el que prefieras).
+4. Copia la contraseña de 16 caracteres.
 
-1. Ve a https://myaccount.google.com/security
-2. Activa la **Verificación en 2 pasos** (si no la tienes)
-3. Ve a **"Contraseñas de aplicaciones"**
-4. Selecciona dispositivo: **Mail** y **Windows**
-5. Gmail te generará una contraseña de 16 caracteres
-6. **Copia esa contraseña**
+## 2. Variables de entorno
 
-### 2. Configurar el archivo `.env`
+### Producción (Vercel)
 
-En la raíz del proyecto, abre el archivo `.env` y completa:
+En el proyecto → **Settings** → **Environment Variables**, añade:
 
-```
-EMAIL_USER=tu-correo@gmail.com
-EMAIL_PASSWORD=xxxx xxxx xxxx xxxx
-RECIPIENT_EMAIL=csilva2527@gmail.com
-PORT=5000
-```
+| Variable           | Valor                                      |
+|--------------------|--------------------------------------------|
+| `EMAIL_USER`       | Tu Gmail                                     |
+| `EMAIL_PASSWORD`   | Contraseña de aplicación (con o sin espacios) |
+| `RECIPIENT_EMAIL`  | Buzón donde quieres recibir los mensajes    |
 
-**Reemplaza:**
-- `tu-correo@gmail.com` con tu email de Gmail
-- `xxxx xxxx xxxx xxxx` con la contraseña de 16 caracteres que generó Gmail
-- `csilva2527@gmail.com` con el correo donde quieres recibir los mensajes
+Despliega de nuevo si ya había un deploy sin estas variables.
 
-### 3. Iniciar el servidor
+### Local (probar envío real)
 
-En la terminal (nueva ventana), desde la raíz del proyecto:
+1. Copia `.env.example` a `.env` y completa los tres valores de correo.
+2. Desde la raíz del proyecto:
 
 ```bash
-node server.js
+npm run dev:vercel
 ```
 
-Deberías ver:
-```
-Servidor de emails corriendo en puerto 5000
-Email configurado: tu-correo@gmail.com
-```
+Esto levanta el frontend y las rutas `/api/*` como en producción. Con **`npm start` solo** no existe `/api/send-email` en local; el formulario mostrará error de red o respuesta inválida.
 
-### 4. Dejar el servidor corriendo
+## 3. Comprobar que funciona
 
-- Mantén la terminal abierta mientras usas la aplicación
-- El formulario enviará emails a través del servidor
+1. Abre la app (la URL que muestre `vercel dev`, normalmente el puerto del front).
+2. Envía el formulario de contacto.
+3. Revisa `RECIPIENT_EMAIL` y la carpeta de spam si no llega al instante.
 
-## ¿Está funcionando?
+## Problemas habituales
 
-1. Llena el formulario de contacto
-2. Haz clic en "Send"
-3. En 2-3 segundos deberías recibir el email en csilva2527@gmail.com
-
-## Problemas comunes:
-
-| Problema | Solución |
-|----------|---------|
-| "Error al conectar con el servidor" | Asegúrate de que el servidor está corriendo (`node server.js`) |
-| "Email inválido" | Verifica que completaste los datos correctamente en `.env` |
-| No llega el email | Revisa la carpeta de SPAM en Gmail |
-| Error 429 (Too many requests) | Alguien envió más de 5 emails en 15 minutos desde la misma IP |
+| Problema | Qué revisar |
+|----------|-------------|
+| Error de red en local | Usar `npm run dev:vercel` y un `.env` con las variables de correo. |
+| "Configuración de correo incompleta" | Faltan `EMAIL_USER`, `EMAIL_PASSWORD` o `RECIPIENT_EMAIL` en Vercel o en `.env` para `vercel dev`. |
+| Email inválido / validación | Campos demasiado cortos o formato incorrecto (el API valida antes de enviar). |
+| No llega el correo | Spam, contraseña de app revocada, o cuenta Gmail con restricciones. |
 
 ## Seguridad
 
-- 🔒 Las credenciales están en `.env` (no en el código)
-- 🔒 Rate limiting: máximo 5 emails cada 15 minutos
-- 🔒 CORS configurado solo para localhost
-- 🔒 Validación completa de datos
-- 🔒 Sin exponer detalles de errores al cliente
-
-## Para producción (cuando deploys)
-
-1. Actualiza `CORS` en `server.js` línea 16 con tu dominio:
-```javascript
-origin: [
-  'https://tudominio.com'
-]
-```
-
-2. Deploy el servidor en Heroku, Railway, Render, etc.
-3. Actualiza la URL en el formulario (línea 27 de `TwoColContactUsWithIllustrationFullForm.js`)
-
-¿Necesitas ayuda? 📧
-
-
+- No subas `.env` al repositorio.
+- Las credenciales solo existen en el entorno de ejecución de Vercel (o en tu máquina para `vercel dev`).
+- El cuerpo del mensaje se escapa para HTML en el email; se validan nombre, email, asunto y mensaje.

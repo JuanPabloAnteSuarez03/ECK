@@ -6,11 +6,6 @@
     "@testing-library/jest-dom": "^5.16.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
-    "body-parser": "^2.2.2",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.3.1",
     "feather-icons": "^4.29.0",
     "framer-motion": "^7.3.2",
     "google-reviews-widget": "^1.0.4",
@@ -30,7 +25,8 @@
     "twin.macro": "^3.0.0-rc.4"
   },
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "start": "cross-env PORT=3001 NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "dev:vercel": "vercel dev",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -42,21 +38,21 @@
     "extends": "react-app",
     "overrides": [
       {
-        "files": [
-          "src/**/*.js"
-        ],
+        "files": ["src/**/*.js"],
         "rules": {
           "import/no-anonymous-default-export": "off"
+        }
+      },
+      {
+        "files": ["api/**/*.js"],
+        "env": {
+          "node": true
         }
       }
     ]
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
+    "production": [">0.2%", "not dead", "not op_mini all"],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
@@ -66,6 +62,7 @@
   "devDependencies": {
     "cross-env": "^10.1.0",
     "heic-convert": "^2.1.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "vercel": "^41.0.0"
   }
 }
