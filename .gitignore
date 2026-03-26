@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+# Proyecto usa npm + package-lock; evitar yarn.lock para que Vercel no ejecute yarn.
+yarn.lock
 
 # testing
 /coverage
