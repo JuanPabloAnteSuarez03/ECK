@@ -12,6 +12,7 @@ import { ReactComponent as PlusIcon } from "feather-icons/dist/icons/plus-circle
 import { ReactComponent as TrashIcon } from "feather-icons/dist/icons/trash-2.svg";
 import {
   ECK_TIMEZONE,
+  currentStatus,
   formatBannerDate,
   formatIntervalLine,
   monctonDateString,
@@ -51,7 +52,12 @@ const TextArea = tw.textarea`mt-1 w-full px-4 py-3 rounded-lg font-medium bg-whi
 const SecondaryBtn = tw.button`inline-flex items-center gap-2 text-sm font-semibold text-primary-600 hover:text-primary-800`;
 const DangerBtn = tw.button`inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800`;
 const IntervalRow = tw.div`flex flex-wrap items-end gap-2 mt-2`;
-const PreviewBox = tw.div`border border-dashed border-primary-300 rounded-xl p-4 bg-primary-500/5`;
+const PreviewShell = tw.div`bg-primary-900 text-gray-100 rounded-xl p-5 sm:p-6 shadow-inner`;
+const PreviewHeading = tw.h4`text-xl sm:text-2xl font-black text-center leading-snug`;
+const PreviewDescription = tw.p`mt-2 text-xs sm:text-sm text-gray-300 text-center`;
+const PreviewStatsRow = tw.div`mt-4 grid grid-cols-3 gap-2 text-center`;
+const PreviewStatValue = tw.div`text-lg sm:text-xl font-black leading-tight`;
+const PreviewStatKey = tw.div`text-[11px] sm:text-xs font-medium text-gray-200 mt-1`;
 const PreviewTitle = tw.h3`text-xs font-bold uppercase tracking-widest text-primary-600`;
 const IllustrationContainer = tw.div`sm:rounded-r-lg flex-1 bg-purple-100 text-center hidden lg:flex justify-center items-stretch`;
 const IllustrationImage = styled.div`
@@ -98,7 +104,7 @@ export default function AdminEckPage() {
             setKvWarn(j.kvConfigured === false);
           }
         } catch {
-          setSaveMsg({ type: "err", text: "No se pudo cargar los datos." });
+          setSaveMsg({ type: "err", text: "Failed to load data." });
         }
       } else {
         setPhase("login");
@@ -124,7 +130,7 @@ export default function AdminEckPage() {
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j.success) {
-        setLoginError(j.message || "No se pudo iniciar sesión.");
+        setLoginError(j.message || "Unable to sign in.");
         setLoginLoading(false);
         return;
       }
@@ -137,7 +143,7 @@ export default function AdminEckPage() {
         setKvWarn(data.kvConfigured === false);
       }
     } catch {
-      setLoginError("Error de red.");
+      setLoginError("Network error.");
     }
     setLoginLoading(false);
   };
@@ -208,12 +214,12 @@ export default function AdminEckPage() {
       const j = await res.json().catch(() => ({}));
       if (res.status === 401) {
         setPhase("login");
-        setSaveMsg({ type: "err", text: "Sesión expirada. Vuelve a entrar." });
+        setSaveMsg({ type: "err", text: "Session expired. Please sign in again." });
         setSaving(false);
         return;
       }
       if (!res.ok || !j.ok) {
-        setSaveMsg({ type: "err", text: j.message || "No se pudo guardar." });
+        setSaveMsg({ type: "err", text: j.message || "Could not save." });
         setSaving(false);
         return;
       }
@@ -221,9 +227,9 @@ export default function AdminEckPage() {
         setDays(Array.isArray(j.data.days) ? j.data.days : []);
       }
       setKvWarn(false);
-      setSaveMsg({ type: "ok", text: "Cambios guardados. Se verán en la web al instante." });
+      setSaveMsg({ type: "ok", text: "Changes saved. They will appear on the site right away." });
     } catch {
-      setSaveMsg({ type: "err", text: "Error de red al guardar." });
+      setSaveMsg({ type: "err", text: "Network error while saving." });
     }
     setSaving(false);
   };
@@ -233,42 +239,54 @@ export default function AdminEckPage() {
       <AnimationRevealPage disabled>
         <Container>
           <Content tw="items-center justify-center min-h-[50vh]">
-            <Muted tw="text-white">Cargando…</Muted>
+            <Muted tw="text-white">Loading…</Muted>
           </Content>
         </Container>
       </AnimationRevealPage>
     );
   }
 
+  const previewIntervals = previewPick ? previewPick.day.intervals || [] : [];
+  const previewIsToday = previewPick?.mode === "today";
+  const previewStatus = previewIsToday
+    ? currentStatus(previewIntervals) === "open"
+      ? "OPEN"
+      : "CLOSED"
+    : "CLOSED";
+  const previewHoursText =
+    previewIntervals.length === 0
+      ? "—"
+      : previewIntervals.map((iv) => formatIntervalLine(iv.start, iv.end, "en")).join(" · ");
+
   return (
     <AnimationRevealPage disabled>
       <Container>
         <Content>
           <MainContainer>
-            <img src={logoColor} alt="ECK" tw="h-16 mx-auto object-contain" />
+            <img src={logoColor} alt="ECK" tw="h-8 mx-auto object-contain" />
             {phase === "login" && (
               <MainContent>
-                <Heading>Administración ECK</Heading>
-                <Muted tw="mt-2 text-center max-w-md">Horario walk-in público (Dieppe, NB). Solo personal autorizado.</Muted>
+                <Heading>ECK Admin</Heading>
+                <Muted tw="mt-2 text-center max-w-md">Public walk-in schedule (Dieppe, NB). Authorized personnel only.</Muted>
                 <Form onSubmit={handleLogin}>
                   <Input
                     type="text"
                     autoComplete="username"
-                    placeholder="Usuario"
+                    placeholder="Username"
                     value={loginUser}
                     onChange={(e) => setLoginUser(e.target.value)}
                   />
                   <Input
                     type="password"
                     autoComplete="current-password"
-                    placeholder="Contraseña"
+                    placeholder="Password"
                     value={loginPass}
                     onChange={(e) => setLoginPass(e.target.value)}
                   />
                   {loginError && <p tw="mt-3 text-sm text-red-600 text-center">{loginError}</p>}
                   <SubmitButton type="submit" disabled={loginLoading}>
                     <LoginIcon className="icon" />
-                    <span className="text">{loginLoading ? "Entrando…" : "Entrar"}</span>
+                    <span className="text">{loginLoading ? "Signing in…" : "Sign In"}</span>
                   </SubmitButton>
                 </Form>
               </MainContent>
@@ -277,15 +295,15 @@ export default function AdminEckPage() {
             {phase === "panel" && (
               <MainContent tw="items-stretch">
                 <div tw="text-center">
-                  <Heading tw="text-left sm:text-center">Horario walk-in</Heading>
+                  <Heading tw="text-left sm:text-center">Walk-In Schedule</Heading>
                   <Muted tw="mt-2">
-                    Zona horaria: {ECK_TIMEZONE}. Los visitantes ven el anuncio según la fecha en esa zona.
+                    Timezone: {ECK_TIMEZONE}. Visitors see the announcement based on the date in that timezone.
                   </Muted>
                   {kvWarn && (
                     <p tw="mt-3 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2">
-                      KV no está configurado en este entorno: el guardado fallará hasta que añadas{" "}
-                      <code>KV_REST_API_URL</code> y <code>KV_REST_API_TOKEN</code> en Vercel (o uses <code>vercel dev</code>{" "}
-                      con proyecto enlazado).
+                      KV is not configured in this environment: saving will fail until you add{" "}
+                      <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> in Vercel (or run{" "}
+                      <code>vercel dev</code> with the project linked).
                     </p>
                   )}
                 </div>
@@ -294,15 +312,15 @@ export default function AdminEckPage() {
                   <Toolbar>
                     <SecondaryBtn type="button" onClick={addDay}>
                       <PlusIcon tw="w-5 h-5" />
-                      Añadir día
+                      Add Day
                     </SecondaryBtn>
                     <div tw="flex flex-wrap gap-2">
                       <SecondaryBtn type="button" onClick={handleLogout}>
-                        Cerrar sesión
+                        Sign Out
                       </SecondaryBtn>
                       <ToolbarSubmit type="submit" disabled={saving}>
                         <SaveIcon className="icon" />
-                        <span className="text">{saving ? "Guardando…" : "Guardar"}</span>
+                        <span className="text">{saving ? "Saving…" : "Save"}</span>
                       </ToolbarSubmit>
                     </div>
                   </Toolbar>
@@ -317,20 +335,22 @@ export default function AdminEckPage() {
                   <div tw="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
                     <PanelCard>
                       {days.length === 0 && (
-                        <Muted>Aún no hay días. Pulsa «Añadir día» y define fechas e intervalos (p. ej. walk-in April 20 → 11:00–19:00).</Muted>
+                        <Muted>
+                          No days yet. Click “Add Day” and set the date and intervals (e.g., walk-in April 20 → 11:00–19:00).
+                        </Muted>
                       )}
                       {days.map((day, dIdx) => (
                         <DayCard key={dIdx}>
                           <div tw="flex flex-wrap items-center justify-between gap-2">
-                            <span tw="text-sm font-bold text-gray-800">Día {dIdx + 1}</span>
+                            <span tw="text-sm font-bold text-gray-800">Day {dIdx + 1}</span>
                             <DangerBtn type="button" onClick={() => removeDay(dIdx)}>
                               <TrashIcon tw="w-4 h-4" />
-                              Quitar día
+                              Remove Day
                             </DangerBtn>
                           </div>
                           <Row>
                             <div>
-                              <Label>Fecha</Label>
+                              <Label>Date</Label>
                               <Input
                                 tw="mt-1 px-4 py-3"
                                 type="date"
@@ -340,19 +360,19 @@ export default function AdminEckPage() {
                               />
                             </div>
                             <div>
-                              <Label>Nota opcional</Label>
+                              <Label>Optional note</Label>
                               <TextArea
-                                placeholder="Ej.: Solo efectivo / Cash only"
+                                placeholder="E.g., Cash only"
                                 value={day.note || ""}
                                 onChange={(e) => updateDay(dIdx, { note: e.target.value })}
                               />
                             </div>
                           </Row>
-                          <Label tw="mt-4 block">Intervalos (máx. 4)</Label>
+                          <Label tw="mt-4 block">Intervals (max. 4)</Label>
                           {(day.intervals || []).map((iv, iIdx) => (
                             <IntervalRow key={iIdx}>
                               <div>
-                                <Label>Inicio</Label>
+                                <Label>Start</Label>
                                 <Input
                                   tw="mt-1 w-32 px-3 py-2"
                                   type="time"
@@ -362,47 +382,88 @@ export default function AdminEckPage() {
                                 />
                               </div>
                               <div>
-                                <Label>Fin</Label>
-                                <Input tw="mt-1 w-32 px-3 py-2" type="time" value={iv.end || ""} onChange={(e) => updateInterval(dIdx, iIdx, { end: e.target.value })} required />
+                                <Label>End</Label>
+                                <Input
+                                  tw="mt-1 w-32 px-3 py-2"
+                                  type="time"
+                                  value={iv.end || ""}
+                                  onChange={(e) => updateInterval(dIdx, iIdx, { end: e.target.value })}
+                                  required
+                                />
                               </div>
                               <DangerBtn type="button" tw="mb-1" onClick={() => removeInterval(dIdx, iIdx)}>
-                                Eliminar intervalo
+                                Remove interval
                               </DangerBtn>
                             </IntervalRow>
                           ))}
-                          <SecondaryBtn type="button" tw="mt-3" onClick={() => addInterval(dIdx)} disabled={(day.intervals || []).length >= 4}>
+                          <SecondaryBtn
+                            type="button"
+                            tw="mt-3"
+                            onClick={() => addInterval(dIdx)}
+                            disabled={(day.intervals || []).length >= 4}
+                          >
                             <PlusIcon tw="w-4 h-4" />
-                            Añadir intervalo
+                            Add interval
                           </SecondaryBtn>
                         </DayCard>
                       ))}
                     </PanelCard>
 
                     <div>
-                      <PreviewTitle>Vista previa (como en la web)</PreviewTitle>
-                      <PreviewBox tw="mt-2">
-                        {!previewPick && <Muted tw="text-gray-600">Sin contenido para mostrar aún (añade al menos un día con horas o nota).</Muted>}
+                      <PreviewTitle>Preview (as shown on the site)</PreviewTitle>
+                      <PreviewShell tw="mt-2">
+                        {!previewPick && (
+                          <p tw="text-sm text-gray-300 text-center">
+                            No content to show yet. Once you add a day with hours, the red section on the homepage will
+                            update automatically.
+                          </p>
+                        )}
                         {previewPick && (
                           <>
-                            <p tw="text-xs font-bold text-primary-600 uppercase tracking-widest">Walk-in</p>
-                            <p tw="text-lg font-black text-gray-900 mt-1">
-                              {(previewPick.mode === "today" ? "Hoy" : "Próximo")} · {formatBannerDate(previewPick.day.date, "es")}
-                            </p>
-                            <p tw="text-sm text-gray-600 mt-1">Sin reserva — orden de llegada</p>
-                            {previewPick.day.intervals?.length > 0 && (
-                              <p tw="mt-3 text-base font-semibold text-gray-800">
-                                {previewPick.day.intervals.map((iv, i) => (
-                                  <span key={i}>
-                                    {i > 0 && " · "}
-                                    {formatIntervalLine(iv.start, iv.end, "es")}
-                                  </span>
-                                ))}
-                              </p>
-                            )}
-                            {previewPick.day.note?.trim() && <p tw="mt-2 text-sm text-gray-700">{previewPick.day.note.trim()}</p>}
+                            <PreviewHeading>
+                              {previewIsToday ? "Walk-In Racing Today" : "Upcoming Walk-In"}
+                            </PreviewHeading>
+                            <PreviewDescription>
+                              {previewPick.day.note?.trim()
+                                ? previewPick.day.note.trim()
+                                : "First come, first served. No reservation required. Just show up and race!"}
+                            </PreviewDescription>
+                            <PreviewStatsRow>
+                              {previewIsToday ? (
+                                <>
+                                  <div>
+                                    <PreviewStatValue>{previewHoursText}</PreviewStatValue>
+                                    <PreviewStatKey>Today's Hours</PreviewStatKey>
+                                  </div>
+                                  <div>
+                                    <PreviewStatValue>{previewStatus}</PreviewStatValue>
+                                    <PreviewStatKey>Status</PreviewStatKey>
+                                  </div>
+                                  <div>
+                                    <PreviewStatValue>8+</PreviewStatValue>
+                                    <PreviewStatKey>Min. Age</PreviewStatKey>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>
+                                    <PreviewStatValue>{formatBannerDate(previewPick.day.date, "en")}</PreviewStatValue>
+                                    <PreviewStatKey>Next Date</PreviewStatKey>
+                                  </div>
+                                  <div>
+                                    <PreviewStatValue>{previewHoursText}</PreviewStatValue>
+                                    <PreviewStatKey>Hours</PreviewStatKey>
+                                  </div>
+                                  <div>
+                                    <PreviewStatValue>8+</PreviewStatValue>
+                                    <PreviewStatKey>Min. Age</PreviewStatKey>
+                                  </div>
+                                </>
+                              )}
+                            </PreviewStatsRow>
                           </>
                         )}
-                      </PreviewBox>
+                      </PreviewShell>
                     </div>
                   </div>
                 </PanelRoot>

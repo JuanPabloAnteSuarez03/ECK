@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import tw from "twin.macro";
 import { css } from "styled-components/macro"; //eslint-disable-line
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { useI18n } from "context/LanguageContext.js";
+import {
+  currentStatus,
+  formatIntervalLine,
+  formatShortDate,
+  monctonDateString,
+  pickBannerDay,
+} from "utils/walkinSchedule.js";
 
 // --- COMPONENTS ---
 import Hero from "components/hero/BackgroundAsImageWithCenteredContent.js";
@@ -17,7 +24,6 @@ import FAQ from "components/faqs/SingleCol.js";
 import ContactUs from "components/forms/TwoColContactUsWithIllustrationFullForm.js";
 import FinalCTA from "components/cta/GetStarted.js";
 import Footer from "components/footers/FiveColumnDark.js";
-import WalkInAnnouncementBanner from "components/walkin/WalkInAnnouncementBanner.js";
 
 import FastIconImage from "images/fast-icon.svg";
 import CustomizeIconImage from "images/customize-icon.svg";
@@ -31,7 +37,82 @@ const HighlightedText = tw.span`text-primary-500`;
 const Subheading = tw.span`uppercase tracking-widest font-bold text-primary-500`;
 
 export default function ServiceLandingPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+
+  const [walkinData, setWalkinData] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/public-walkin", { credentials: "same-origin" });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => null);
+        if (!cancelled && json && json.ok && json.data) {
+          setWalkinData(json.data);
+        }
+      } catch {
+        /* silencioso: se mantienen los valores por defecto */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const walkInSection = useMemo(() => {
+    const defaultStats = [
+      { key: t("walkIn.hours"), value: "3–9 PM" },
+      { key: t("walkIn.status"), value: t("walkIn.open") },
+      { key: t("walkIn.age"), value: "8+" },
+    ];
+    const base = {
+      heading: t("walkIn.heading"),
+      description: t("walkIn.description"),
+      stats: defaultStats,
+    };
+    if (!walkinData || !Array.isArray(walkinData.days)) return base;
+    const todayStr = monctonDateString();
+    const pick = pickBannerDay(walkinData.days, todayStr);
+    if (!pick) return base;
+    const intervals = Array.isArray(pick.day.intervals) ? pick.day.intervals : [];
+    const hoursNode =
+      intervals.length === 0 ? (
+        "—"
+      ) : intervals.length === 1 ? (
+        <span>{formatIntervalLine(intervals[0].start, intervals[0].end, locale)}</span>
+      ) : (
+        <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">
+          {intervals.map((iv, i) => (
+            <span key={i} tw="block">
+              {formatIntervalLine(iv.start, iv.end, locale)}
+            </span>
+          ))}
+        </span>
+      );
+    if (pick.mode === "today") {
+      const status = currentStatus(intervals) === "open" ? t("walkIn.open") : t("walkIn.closed");
+      return {
+        heading: t("walkIn.heading"),
+        description: pick.day.note && pick.day.note.trim() ? pick.day.note.trim() : t("walkIn.description"),
+        stats: [
+          { key: t("walkIn.hours"), value: hoursNode },
+          { key: t("walkIn.status"), value: status },
+          { key: t("walkIn.age"), value: "8+" },
+        ],
+      };
+    }
+    const shortDate = formatShortDate(pick.day.date, locale);
+    return {
+      heading: t("walkIn.upcomingHeading"),
+      description: pick.day.note && pick.day.note.trim() ? pick.day.note.trim() : t("walkIn.description"),
+      stats: [
+        { key: t("walkIn.nextDate"), value: <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">{shortDate}</span> },
+        { key: t("walkIn.hoursLabel"), value: hoursNode },
+        { key: t("walkIn.age"), value: "8+" },
+      ],
+    };
+  }, [walkinData, locale, t]);
 
   const kartHeading = (
     <>
@@ -198,17 +279,11 @@ export default function ServiceLandingPage() {
     <AnimationRevealPage>
       <Hero />
 
-      <WalkInAnnouncementBanner />
-
       <FeatureStats
         subheading=""
-        heading={t("walkIn.heading")}
-        description={t("walkIn.description")}
-        stats={[
-          { key: t("walkIn.hours"), value: "3–9 PM" },
-          { key: t("walkIn.status"), value: t("walkIn.open") },
-          { key: t("walkIn.age"), value: "8+" },
-        ]}
+        heading={walkInSection.heading}
+        description={walkInSection.description}
+        stats={walkInSection.stats}
         accentIllustrationSrc={walkInHelmetIllustration}
         accentIllustrationAlt={t("illus.walkIn")}
       />

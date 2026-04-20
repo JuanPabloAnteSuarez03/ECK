@@ -44,6 +44,53 @@ export function formatBannerDate(dateStr, locale) {
   }).format(utcNoon);
 }
 
+/** Short date: "Tue, Apr 21" */
+export function formatShortDate(dateStr, locale) {
+  const [y, M, d] = dateStr.split("-").map(Number);
+  const utcNoon = new Date(Date.UTC(y, M - 1, d, 12, 0, 0));
+  const loc = locale === "fr" ? "fr-CA" : "en-CA";
+  return new Intl.DateTimeFormat(loc, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: ECK_TIMEZONE,
+  }).format(utcNoon);
+}
+
+/** Current time-of-day in Moncton as minutes since 00:00 */
+export function monctonNowMinutes(date = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: ECK_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const hh = parseInt(fmt.find((p) => p.type === "hour")?.value, 10);
+  const mm = parseInt(fmt.find((p) => p.type === "minute")?.value, 10);
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return 0;
+  const h = hh === 24 ? 0 : hh;
+  return h * 60 + mm;
+}
+
+function toMinutes(hhmm) {
+  const [h, m] = String(hhmm).split(":").map(Number);
+  return h * 60 + m;
+}
+
+/**
+ * Determines if the track is currently open, based on today's intervals.
+ * @returns {'open'|'closed'}
+ */
+export function currentStatus(todayIntervals, nowMinutes = monctonNowMinutes()) {
+  if (!Array.isArray(todayIntervals) || todayIntervals.length === 0) return "closed";
+  const inside = todayIntervals.some((iv) => {
+    const s = toMinutes(iv.start);
+    const e = toMinutes(iv.end);
+    return nowMinutes >= s && nowMinutes < e;
+  });
+  return inside ? "open" : "closed";
+}
+
 /**
  * @param {{ date: string, intervals: {start:string,end:string}[], note?: string }[]} days
  * @returns {{ mode: 'today'|'upcoming', day: object } | null}
