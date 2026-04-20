@@ -35,6 +35,11 @@ export const translations = {
     "walkIn.age": "Min. Age",
     "walkIn.open": "OPEN",
 
+    "walkin.banner.kicker": "Walk-in",
+    "walkin.banner.titleToday": "Walk-in hours",
+    "walkin.banner.titleUpcoming": "Upcoming walk-in",
+    "walkin.banner.subtitle": "No reservation — first come, first served",
+
     "karts.headingBefore": "Our ",
     "karts.headingAccent": "Karts",
     "karts.description":
@@ -208,6 +213,11 @@ export const translations = {
     "walkIn.status": "Statut",
     "walkIn.age": "Âge min.",
     "walkIn.open": "OUVERT",
+
+    "walkin.banner.kicker": "Accès libre",
+    "walkin.banner.titleToday": "Heures sans réservation",
+    "walkin.banner.titleUpcoming": "Prochains créneaux",
+    "walkin.banner.subtitle": "Sans réservation — premier arrivé, premier servi",
 
     "karts.headingBefore": "Nos ",
     "karts.headingAccent": "karts",

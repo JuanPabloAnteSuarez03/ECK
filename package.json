@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.16.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
+    "@vercel/kv": "^3.0.0",
     "feather-icons": "^4.29.0",
     "framer-motion": "^7.3.2",
     "google-reviews-widget": "^1.0.4",
@@ -38,13 +39,17 @@
     "extends": "react-app",
     "overrides": [
       {
-        "files": ["src/**/*.js"],
+        "files": [
+          "src/**/*.js"
+        ],
         "rules": {
           "import/no-anonymous-default-export": "off"
         }
       },
       {
-        "files": ["api/**/*.js"],
+        "files": [
+          "api/**/*.js"
+        ],
         "env": {
           "node": true
         }
@@ -52,7 +57,11 @@
     ]
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",

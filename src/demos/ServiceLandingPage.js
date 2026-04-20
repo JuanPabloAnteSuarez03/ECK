@@ -17,6 +17,7 @@ import FAQ from "components/faqs/SingleCol.js";
 import ContactUs from "components/forms/TwoColContactUsWithIllustrationFullForm.js";
 import FinalCTA from "components/cta/GetStarted.js";
 import Footer from "components/footers/FiveColumnDark.js";
+import WalkInAnnouncementBanner from "components/walkin/WalkInAnnouncementBanner.js";
 
 import FastIconImage from "images/fast-icon.svg";
 import CustomizeIconImage from "images/customize-icon.svg";
@@ -196,6 +197,8 @@ export default function ServiceLandingPage() {
   return (
     <AnimationRevealPage>
       <Hero />
+
+      <WalkInAnnouncementBanner />
 
       <FeatureStats
         subheading=""
