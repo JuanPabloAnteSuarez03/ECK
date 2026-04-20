@@ -4,7 +4,6 @@ import { Container as ContainerBase } from "components/misc/Layouts";
 import tw from "twin.macro";
 import styled from "styled-components";
 import { css } from "styled-components/macro"; //eslint-disable-line
-import illustration from "images/login-illustration.svg";
 import logoColor from "images/logo-color.png";
 import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg";
 import { ReactComponent as SaveIcon } from "feather-icons/dist/icons/save.svg";
@@ -20,8 +19,8 @@ import {
 } from "utils/walkinSchedule.js";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
-const Content = tw.div`max-w-screen-xl m-0 sm:mx-20 sm:my-16 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
-const MainContainer = tw.div`w-full lg:w-1/2 xl:w-7/12 p-6 sm:p-12 flex flex-col`;
+const Content = tw.div`w-full max-w-screen-2xl m-0 sm:mx-8 sm:my-12 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
+const MainContainer = tw.div`w-full p-6 sm:p-12 flex flex-col`;
 const MainContent = tw.div`mt-8 flex flex-col items-center w-full flex-1`;
 
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold text-center`;
@@ -59,13 +58,6 @@ const PreviewStatsRow = tw.div`mt-4 grid grid-cols-3 gap-2 text-center`;
 const PreviewStatValue = tw.div`text-lg sm:text-xl font-black leading-tight`;
 const PreviewStatKey = tw.div`text-[11px] sm:text-xs font-medium text-gray-200 mt-1`;
 const PreviewTitle = tw.h3`text-xs font-bold uppercase tracking-widest text-primary-600`;
-const IllustrationContainer = tw.div`sm:rounded-r-lg flex-1 bg-purple-100 text-center hidden lg:flex justify-center items-stretch`;
-const IllustrationImage = styled.div`
-  ${(props) => css`
-    background-image: url("${props.imageSrc}");
-  `}
-  ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
-`;
 
 function emptyDay() {
   return { date: monctonDateString(), intervals: [{ start: "11:00", end: "19:00" }], note: "" };
@@ -470,9 +462,6 @@ export default function AdminEckPage() {
               </MainContent>
             )}
           </MainContainer>
-          <IllustrationContainer>
-            <IllustrationImage imageSrc={illustration} />
-          </IllustrationContainer>
         </Content>
       </Container>
     </AnimationRevealPage>
