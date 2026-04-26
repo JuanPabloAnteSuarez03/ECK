@@ -82,8 +82,19 @@ const ECK_REVIEWS = [
 
 const PrimaryBackgroundContainer = tw(ContainerBase)`-mx-8 px-8 bg-primary-500 text-white`;
 const HeadingContainer = tw.div`text-center`;
-const Subheading = tw(SubheadingBase)`text-white text-center mb-4`;
-const Heading = tw(SectionHeading)`text-white`;
+const Subheading = styled(SubheadingBase)`
+  ${tw`text-white text-center mb-4`}
+  span,
+  & * {
+    ${tw`text-white`}
+  }
+`;
+const Heading = styled(SectionHeading)`
+  ${tw`text-white`}
+  span {
+    ${tw`text-yellow-500`}
+  }
+`;
 const Description = tw.p`mt-4 text-center text-sm md:text-base lg:text-lg font-medium leading-relaxed max-w-3xl mx-auto text-white opacity-75`;
 
 const SliderWrap = tw.div`mt-12 md:mt-16 relative lg:px-16`;
