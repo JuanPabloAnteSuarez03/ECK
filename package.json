@@ -9,7 +9,6 @@
     "@vercel/kv": "^3.0.0",
     "feather-icons": "^4.29.0",
     "framer-motion": "^7.3.2",
-    "google-reviews-widget": "^1.0.4",
     "nodemailer": "^8.0.3",
     "react": "^18.0.0",
     "react-anchor-link-smooth-scroll": "^1.0.12",

@@ -335,7 +335,6 @@ export default function ServiceLandingPage() {
       />
 
       <EckBeaverReviewsSection
-        instanceId="2v92fl0CjmPPaAx2rWEN"
         subheading={<Subheading>{t("reviews.subheading")}</Subheading>}
         heading={reviewsHeading}
         description={t("reviews.description")}
