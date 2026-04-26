@@ -86,13 +86,13 @@ const Subheading = tw(SubheadingBase)`text-white text-center mb-4`;
 const Heading = tw(SectionHeading)`text-white`;
 const Description = tw.p`mt-4 text-center text-sm md:text-base lg:text-lg font-medium leading-relaxed max-w-3xl mx-auto text-white opacity-75`;
 
-const SliderWrap = tw.div`mt-12 md:mt-16 relative`;
+const SliderWrap = tw.div`mt-12 md:mt-16 relative lg:px-16`;
 
 const ReviewsSlider = styled(Slider)`
   ${tw`w-full`}
   .slick-list {
     ${tw`overflow-hidden -mx-3`}
-    padding: 1rem 0 2rem;
+    padding: 1rem 0 3rem;
   }
   .slick-track {
     ${tw`flex! items-stretch`}
@@ -104,15 +104,30 @@ const ReviewsSlider = styled(Slider)`
     ${tw`h-full`}
   }
   .slick-dots {
-    ${tw`mt-4`}
-    li button:before {
-      color: white;
-      opacity: 0.5;
-      font-size: 9px;
-    }
-    li.slick-active button:before {
-      color: white;
-      opacity: 1;
+    ${tw`flex! items-center justify-center mt-2 p-0 list-none w-full`}
+    position: absolute;
+    bottom: -2.25rem;
+    left: 0;
+    li {
+      ${tw`mx-1 inline-block`}
+      width: auto;
+      height: auto;
+      button {
+        ${tw`block w-3 h-3 p-0 rounded-full bg-white border-0 cursor-pointer`}
+        text-indent: -9999px;
+        opacity: 0.5;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      button:before {
+        content: none;
+      }
+      button:hover {
+        opacity: 0.8;
+      }
+      &.slick-active button {
+        opacity: 1;
+        transform: scale(1.25);
+      }
     }
   }
 `;
@@ -132,7 +147,7 @@ const AuthorName = tw.span`text-base font-bold text-gray-900`;
 const SourceBadge = tw.span`text-xs font-semibold uppercase tracking-wider text-primary-700`;
 
 const ControlButton = styled.button`
-  ${tw`absolute top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center
+  ${tw`absolute top-1/2 -translate-y-1/2 z-10 hidden lg:flex items-center justify-center
         w-12 h-12 rounded-full bg-white text-primary-700 shadow-lg
         hover:bg-primary-700 hover:text-white transition-colors duration-300
         focus:outline-none`}
@@ -207,7 +222,7 @@ export default function EckBeaverReviewsSection({
             type="button"
             onClick={() => sliderRef?.slickPrev()}
             aria-label="Previous review"
-            css={tw`left-0 -translate-x-1/2`}
+            css={tw`left-0`}
           >
             <ChevronLeftIcon />
           </ControlButton>
@@ -237,7 +252,7 @@ export default function EckBeaverReviewsSection({
             type="button"
             onClick={() => sliderRef?.slickNext()}
             aria-label="Next review"
-            css={tw`right-0 translate-x-1/2`}
+            css={tw`right-0`}
           >
             <ChevronRightIcon />
           </ControlButton>
