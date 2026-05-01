@@ -73,8 +73,8 @@ const Heading = styled.h1`
 const Description = tw.p`text-gray-300 text-center text-sm sm:text-base lg:text-lg font-medium mt-4 max-w-2xl`;
 
 const Actions = tw.div`flex flex-col sm:flex-row mt-10 sm:mt-16`;
-const PrimaryAction = tw(AnchorLink)`rounded-full px-8 py-3 text-sm sm:text-base sm:px-10 sm:py-4 bg-primary-500 text-gray-100 font-bold shadow-lg transition duration-300 hocus:bg-primary-700 hocus:text-gray-200 focus:outline-none focus:shadow-outline`;
-const SecondaryAction = tw(AnchorLink)`rounded-full px-8 py-3 mt-4 sm:mt-0 sm:ml-4 text-sm sm:text-base sm:px-10 sm:py-4 bg-transparent text-gray-100 font-bold border-2 border-gray-300 transition duration-300 hocus:border-primary-500 hocus:text-primary-500 focus:outline-none focus:shadow-outline`;
+const PrimaryAction = tw(AnchorLink)`rounded-full px-8 py-3 text-sm sm:text-base sm:px-10 sm:py-4 bg-primary-500 text-gray-100 font-bold shadow-lg transition duration-300 hocus:bg-primary-700 hocus:text-gray-200 focus:outline-none focus:shadow-outline flex items-center justify-center`;
+const SecondaryAction = tw(AnchorLink)`rounded-full px-8 py-3 mt-4 sm:mt-0 sm:ml-4 text-sm sm:text-base sm:px-10 sm:py-4 bg-transparent text-gray-100 font-bold border-2 border-gray-300 transition duration-300 hocus:border-primary-500 hocus:text-primary-500 focus:outline-none focus:shadow-outline flex items-center justify-center`;
 
 const DotNav = styled.div`
   ${tw`z-[3] absolute left-0 right-0 flex justify-center gap-2`}

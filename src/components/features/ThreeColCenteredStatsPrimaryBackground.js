@@ -64,8 +64,8 @@ export default ({
         <StatsContainer>
           {stats.map((stat, index) => (
             <Stat key={index}>
-              <StatValue>{stat.value}</StatValue>
               <StatKey>{stat.key}</StatKey>
+              <StatValue>{stat.value}</StatValue>
             </Stat>
           ))}
         </StatsContainer>

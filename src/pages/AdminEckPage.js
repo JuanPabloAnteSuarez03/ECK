@@ -413,7 +413,13 @@ export default function AdminEckPage() {
                         {previewPick && (
                           <>
                             <PreviewHeading>
-                              {previewIsToday ? "Walk-In Racing Today" : "Upcoming Walk-In"}
+                              {previewIsToday ? (
+                                "Walk-In Racing Today"
+                              ) : (
+                                <>
+                                  Upcoming <span style={{ whiteSpace: "nowrap" }}>Walk-In</span>
+                                </>
+                              )}
                             </PreviewHeading>
                             <PreviewDescription>
                               {previewPick.day.note?.trim()
