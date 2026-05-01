@@ -104,7 +104,11 @@ export default function ServiceLandingPage() {
     }
     const shortDate = formatShortDate(pick.day.date, locale);
     return {
-      heading: t("walkIn.upcomingHeading"),
+      heading: (
+        <>
+          Upcoming <span style={{ whiteSpace: "nowrap" }}>Walk-In</span>
+        </>
+      ),
       description: pick.day.note && pick.day.note.trim() ? pick.day.note.trim() : t("walkIn.description"),
       stats: [
         { key: t("walkIn.nextDate"), value: <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">{shortDate}</span> },
@@ -260,8 +264,6 @@ export default function ServiceLandingPage() {
     minigp: t("footer.minigp"),
     birthdays: t("footer.birthdays"),
     corporate: t("footer.corporate"),
-    privacy: t("footer.privacy"),
-    terms: t("footer.terms"),
     waiver: t("footer.waiver"),
     directions: t("footer.directions"),
     copyright: t("footer.copyright"),
