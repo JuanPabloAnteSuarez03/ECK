@@ -12,12 +12,36 @@ function kvConfigured() {
 }
 
 function defaultWalkin() {
-  return { timezone: DEFAULT_TIMEZONE, days: [] };
+  return { timezone: DEFAULT_TIMEZONE, weekly: {}, days: [] };
 }
 
 function parseMinutes(t) {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
+}
+
+function validateIntervals(rawIntervals, ctx) {
+  if (!Array.isArray(rawIntervals)) {
+    return { ok: false, message: `intervals debe ser un array (${ctx})` };
+  }
+  if (rawIntervals.length > 4) {
+    return { ok: false, message: `Máximo 4 intervalos (${ctx})` };
+  }
+  const out = [];
+  for (const iv of rawIntervals) {
+    if (!iv || typeof iv !== "object") {
+      return { ok: false, message: `Intervalo inválido (${ctx})` };
+    }
+    const { start, end } = iv;
+    if (typeof start !== "string" || !TIME_RE.test(start) || typeof end !== "string" || !TIME_RE.test(end)) {
+      return { ok: false, message: `Horas deben ser HH:mm 24h (${ctx})` };
+    }
+    if (parseMinutes(start) >= parseMinutes(end)) {
+      return { ok: false, message: `La hora de inicio debe ser antes del fin (${ctx})` };
+    }
+    out.push({ start, end });
+  }
+  return { ok: true, value: out };
 }
 
 function validateWalkinPayload(body) {
@@ -30,6 +54,28 @@ function validateWalkinPayload(body) {
   }
   if (body.days.length > 60) {
     return { ok: false, message: "Máximo 60 días" };
+  }
+
+  const normalizedWeekly = {};
+  if (body.weekly != null) {
+    if (typeof body.weekly !== "object" || Array.isArray(body.weekly)) {
+      return { ok: false, message: "`weekly` debe ser un objeto" };
+    }
+    for (const key of Object.keys(body.weekly)) {
+      if (!/^[0-6]$/.test(key)) {
+        return { ok: false, message: `Clave de weekly inválida: ${key}` };
+      }
+      const entry = body.weekly[key];
+      if (entry == null) continue;
+      if (typeof entry !== "object") {
+        return { ok: false, message: `Entrada weekly inválida (día ${key})` };
+      }
+      const ivCheck = validateIntervals(entry.intervals || [], `weekly day ${key}`);
+      if (!ivCheck.ok) return ivCheck;
+      const note = typeof entry.note === "string" ? entry.note.slice(0, 500) : "";
+      if (ivCheck.value.length === 0 && !note) continue;
+      normalizedWeekly[key] = { intervals: ivCheck.value, note };
+    }
   }
 
   const seenDates = new Set();
@@ -49,35 +95,15 @@ function validateWalkinPayload(body) {
     seenDates.add(date);
 
     const note = typeof day.note === "string" ? day.note.slice(0, 500) : "";
-    if (!Array.isArray(day.intervals)) {
-      return { ok: false, message: "intervals debe ser un array" };
-    }
-    if (day.intervals.length > 4) {
-      return { ok: false, message: "Máximo 4 intervalos por día" };
-    }
+    const ivCheck = validateIntervals(day.intervals || [], `date ${date}`);
+    if (!ivCheck.ok) return ivCheck;
 
-    const normalizedIntervals = [];
-    for (const iv of day.intervals) {
-      if (!iv || typeof iv !== "object") {
-        return { ok: false, message: "Intervalo inválido" };
-      }
-      const start = iv.start;
-      const end = iv.end;
-      if (typeof start !== "string" || !TIME_RE.test(start) || typeof end !== "string" || !TIME_RE.test(end)) {
-        return { ok: false, message: "Horas deben ser HH:mm (24h)" };
-      }
-      if (parseMinutes(start) >= parseMinutes(end)) {
-        return { ok: false, message: "La hora de inicio debe ser antes del fin" };
-      }
-      normalizedIntervals.push({ start, end });
-    }
-
-    normalizedDays.push({ date, intervals: normalizedIntervals, note });
+    normalizedDays.push({ date, intervals: ivCheck.value, note });
   }
 
   normalizedDays.sort((a, b) => a.date.localeCompare(b.date));
 
-  return { ok: true, value: { timezone, days: normalizedDays } };
+  return { ok: true, value: { timezone, weekly: normalizedWeekly, days: normalizedDays } };
 }
 
 async function getWalkinData() {
@@ -102,7 +128,8 @@ async function getWalkinData() {
     }
     const tz = typeof parsed.timezone === "string" && parsed.timezone.trim() ? parsed.timezone.trim() : DEFAULT_TIMEZONE;
     const days = Array.isArray(parsed.days) ? parsed.days : [];
-    return { timezone: tz, days };
+    const weekly = parsed.weekly && typeof parsed.weekly === "object" && !Array.isArray(parsed.weekly) ? parsed.weekly : {};
+    return { timezone: tz, weekly, days };
   } catch (e) {
     console.error("walkin-store get:", e);
     return defaultWalkin();

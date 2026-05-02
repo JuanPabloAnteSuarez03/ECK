@@ -6,9 +6,10 @@ import { useI18n } from "context/LanguageContext.js";
 import {
   currentStatus,
   formatIntervalLine,
-  formatShortDate,
+  getWeeklySummary,
   monctonDateString,
-  pickBannerDay,
+  monctonWeekday,
+  resolveTodaySchedule,
 } from "utils/walkinSchedule.js";
 
 // --- COMPONENTS ---
@@ -61,27 +62,20 @@ export default function ServiceLandingPage() {
   }, []);
 
   const walkInSection = useMemo(() => {
-    const defaultStats = [
-      { key: t("walkIn.hours"), value: "3–9 PM" },
-      { key: t("walkIn.status"), value: t("walkIn.open") },
-      { key: t("walkIn.age"), value: "8+" },
-    ];
-    const base = {
-      heading: t("walkIn.heading"),
-      description: t("walkIn.description"),
-      stats: defaultStats,
-    };
-    if (!walkinData || !Array.isArray(walkinData.days)) return base;
+    const heading = t("walkIn.heading");
     const todayStr = monctonDateString();
-    const pick = pickBannerDay(walkinData.days, todayStr);
-    if (!pick) return base;
-    const intervals = Array.isArray(pick.day.intervals) ? pick.day.intervals : [];
-    const hoursNode =
-      intervals.length === 0 ? (
-        "—"
-      ) : intervals.length === 1 ? (
-        <span>{formatIntervalLine(intervals[0].start, intervals[0].end, locale)}</span>
-      ) : (
+    const today = resolveTodaySchedule(walkinData || { weekly: {}, days: [] }, todayStr);
+    const intervals = today.intervals;
+
+    let hoursNode;
+    if (intervals.length === 0) {
+      hoursNode = (
+        <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">{t("walkIn.closedToday")}</span>
+      );
+    } else if (intervals.length === 1) {
+      hoursNode = <span>{formatIntervalLine(intervals[0].start, intervals[0].end, locale)}</span>;
+    } else {
+      hoursNode = (
         <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">
           {intervals.map((iv, i) => (
             <span key={i} tw="block">
@@ -90,28 +84,44 @@ export default function ServiceLandingPage() {
           ))}
         </span>
       );
-    if (pick.mode === "today") {
-      const status = currentStatus(intervals) === "open" ? t("walkIn.open") : t("walkIn.closed");
-      return {
-        heading: t("walkIn.heading"),
-        description: pick.day.note && pick.day.note.trim() ? pick.day.note.trim() : t("walkIn.description"),
-        stats: [
-          { key: t("walkIn.hours"), value: hoursNode },
-          { key: t("walkIn.status"), value: status },
-          { key: t("walkIn.age"), value: "8+" },
-        ],
-      };
     }
-    const shortDate = formatShortDate(pick.day.date, locale);
+
+    const status = intervals.length > 0 && currentStatus(intervals) === "open" ? t("walkIn.open") : t("walkIn.closed");
+    const description = today.note && today.note.trim() ? today.note.trim() : t("walkIn.description");
+
     return {
-      heading: t("walkIn.upcomingHeading"),
-      description: pick.day.note && pick.day.note.trim() ? pick.day.note.trim() : t("walkIn.description"),
+      heading,
+      description,
       stats: [
-        { key: t("walkIn.nextDate"), value: <span tw="block text-2xl md:text-3xl lg:text-4xl leading-tight">{shortDate}</span> },
-        { key: t("walkIn.hoursLabel"), value: hoursNode },
+        { key: t("walkIn.hours"), value: hoursNode },
+        { key: t("walkIn.status"), value: status },
         { key: t("walkIn.age"), value: "8+" },
       ],
     };
+  }, [walkinData, locale, t]);
+
+  const weeklyFooter = useMemo(() => {
+    const summary = getWeeklySummary(walkinData?.weekly || {}, locale, monctonWeekday());
+    if (!summary.length) return null;
+    return (
+      <div tw="text-center">
+        <p tw="text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-300">
+          {t("walkIn.regularHours")}
+        </p>
+        <ul tw="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm sm:text-base text-gray-100 list-none p-0">
+          {summary.map((item) => (
+            <li key={item.weekday} tw="flex items-baseline gap-2">
+              <span tw="font-bold uppercase tracking-wide">{item.label}</span>
+              <span>
+                {item.intervals
+                  .map((iv) => formatIntervalLine(iv.start, iv.end, locale))
+                  .join(" / ")}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   }, [walkinData, locale, t]);
 
   const kartHeading = (
@@ -286,6 +296,7 @@ export default function ServiceLandingPage() {
         stats={walkInSection.stats}
         accentIllustrationSrc={walkInHelmetIllustration}
         accentIllustrationAlt={t("illus.walkIn")}
+        footerNode={weeklyFooter}
       />
 
       <KartSpecs

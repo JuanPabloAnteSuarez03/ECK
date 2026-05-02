@@ -29,6 +29,8 @@ const WalkInAccentImg = styled.img`
   }
 `;
 
+const FooterContainer = tw.div`relative z-10 mt-6 max-w-screen-md mx-auto`;
+
 export default ({
   subheading = "",
   heading = "Over 9000 Projects Completed",
@@ -49,6 +51,7 @@ export default ({
   ],
   accentIllustrationSrc = null,
   accentIllustrationAlt = "",
+  footerNode = null,
 }) => {
   return (
     <Container id="walkIn">
@@ -69,6 +72,7 @@ export default ({
             </Stat>
           ))}
         </StatsContainer>
+        {footerNode && <FooterContainer>{footerNode}</FooterContainer>}
       </ContentWithPaddingXl>
     </Container>
   );

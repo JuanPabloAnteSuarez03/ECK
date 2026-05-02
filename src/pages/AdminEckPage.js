@@ -12,11 +12,18 @@ import { ReactComponent as TrashIcon } from "feather-icons/dist/icons/trash-2.sv
 import {
   ECK_TIMEZONE,
   currentStatus,
-  formatBannerDate,
   formatIntervalLine,
+  getWeeklySummary,
   monctonDateString,
-  pickBannerDay,
+  monctonWeekday,
+  resolveTodaySchedule,
 } from "utils/walkinSchedule.js";
+
+const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon..Sun
+function weekdayLabel(weekday) {
+  const refDate = new Date(Date.UTC(2024, 11, 1 + weekday, 12, 0, 0)); // 2024-12-01 was Sunday
+  return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "UTC" }).format(refDate);
+}
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
 const Content = tw.div`w-full max-w-screen-2xl m-0 sm:mx-8 sm:my-12 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
@@ -72,6 +79,7 @@ export default function AdminEckPage() {
 
   const [kvWarn, setKvWarn] = useState(false);
   const [days, setDays] = useState([]);
+  const [weekly, setWeekly] = useState({});
   const [saveMsg, setSaveMsg] = useState({ type: "", text: "" });
   const [saving, setSaving] = useState(false);
 
@@ -93,6 +101,7 @@ export default function AdminEckPage() {
           const j = await r.json().catch(() => ({}));
           if (r.ok && j.ok && j.data) {
             setDays(Array.isArray(j.data.days) ? j.data.days : []);
+            setWeekly(j.data.weekly && typeof j.data.weekly === "object" ? j.data.weekly : {});
             setKvWarn(j.kvConfigured === false);
           }
         } catch {
@@ -107,7 +116,10 @@ export default function AdminEckPage() {
     };
   }, [refreshSession]);
 
-  const previewPick = useMemo(() => pickBannerDay(days, monctonDateString()), [days]);
+  const todayStr = monctonDateString();
+  const todayWeekday = monctonWeekday(todayStr);
+  const previewToday = useMemo(() => resolveTodaySchedule({ weekly, days }, todayStr), [weekly, days, todayStr]);
+  const previewWeekly = useMemo(() => getWeeklySummary(weekly, "en", todayWeekday), [weekly, todayWeekday]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -132,6 +144,7 @@ export default function AdminEckPage() {
       const data = await r.json().catch(() => ({}));
       if (r.ok && data.ok && data.data) {
         setDays(Array.isArray(data.data.days) ? data.data.days : []);
+        setWeekly(data.data.weekly && typeof data.data.weekly === "object" ? data.data.weekly : {});
         setKvWarn(data.kvConfigured === false);
       }
     } catch {
@@ -144,6 +157,7 @@ export default function AdminEckPage() {
     await fetch("/api/admin-logout", { method: "POST", credentials: "include" });
     setPhase("login");
     setDays([]);
+    setWeekly({});
   };
 
   const updateDay = (index, patch) => {
@@ -192,6 +206,62 @@ export default function AdminEckPage() {
     setDays((prev) => prev.filter((_, i) => i !== dIdx));
   };
 
+  const setWeeklyOpen = (weekday, open) => {
+    setWeekly((prev) => {
+      const next = { ...prev };
+      if (open) {
+        if (!next[String(weekday)] || !Array.isArray(next[String(weekday)].intervals)) {
+          next[String(weekday)] = { intervals: [{ start: "11:00", end: "19:00" }], note: "" };
+        }
+      } else {
+        delete next[String(weekday)];
+      }
+      return next;
+    });
+  };
+
+  const updateWeeklyInterval = (weekday, iIdx, patch) => {
+    setWeekly((prev) => {
+      const key = String(weekday);
+      const entry = prev[key];
+      if (!entry) return prev;
+      const ivs = [...(entry.intervals || [])];
+      ivs[iIdx] = { ...ivs[iIdx], ...patch };
+      return { ...prev, [key]: { ...entry, intervals: ivs } };
+    });
+  };
+
+  const addWeeklyInterval = (weekday) => {
+    setWeekly((prev) => {
+      const key = String(weekday);
+      const entry = prev[key];
+      if (!entry) return prev;
+      const ivs = [...(entry.intervals || [])];
+      if (ivs.length >= 4) return prev;
+      ivs.push({ start: "12:00", end: "17:00" });
+      return { ...prev, [key]: { ...entry, intervals: ivs } };
+    });
+  };
+
+  const removeWeeklyInterval = (weekday, iIdx) => {
+    setWeekly((prev) => {
+      const key = String(weekday);
+      const entry = prev[key];
+      if (!entry) return prev;
+      const ivs = [...(entry.intervals || [])].filter((_, i) => i !== iIdx);
+      return { ...prev, [key]: { ...entry, intervals: ivs.length ? ivs : [{ start: "11:00", end: "19:00" }] } };
+    });
+  };
+
+  const updateWeeklyNote = (weekday, note) => {
+    setWeekly((prev) => {
+      const key = String(weekday);
+      const entry = prev[key];
+      if (!entry) return prev;
+      return { ...prev, [key]: { ...entry, note } };
+    });
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -201,7 +271,7 @@ export default function AdminEckPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ timezone: ECK_TIMEZONE, days }),
+        body: JSON.stringify({ timezone: ECK_TIMEZONE, weekly, days }),
       });
       const j = await res.json().catch(() => ({}));
       if (res.status === 401) {
@@ -217,6 +287,7 @@ export default function AdminEckPage() {
       }
       if (j.data) {
         setDays(Array.isArray(j.data.days) ? j.data.days : []);
+        setWeekly(j.data.weekly && typeof j.data.weekly === "object" ? j.data.weekly : {});
       }
       setKvWarn(false);
       setSaveMsg({ type: "ok", text: "Changes saved. They will appear on the site right away." });
@@ -238,17 +309,17 @@ export default function AdminEckPage() {
     );
   }
 
-  const previewIntervals = previewPick ? previewPick.day.intervals || [] : [];
-  const previewIsToday = previewPick?.mode === "today";
-  const previewStatus = previewIsToday
-    ? currentStatus(previewIntervals) === "open"
-      ? "OPEN"
-      : "CLOSED"
-    : "CLOSED";
+  const previewIntervals = previewToday.intervals;
+  const previewStatus =
+    previewIntervals.length > 0 && currentStatus(previewIntervals) === "open" ? "OPEN" : "CLOSED";
   const previewHoursText =
     previewIntervals.length === 0
-      ? "—"
+      ? "Closed today"
       : previewIntervals.map((iv) => formatIntervalLine(iv.start, iv.end, "en")).join(" · ");
+  const previewDescription =
+    previewToday.note && previewToday.note.trim()
+      ? previewToday.note.trim()
+      : "First come, first served. No reservation required. Just show up and race!";
 
   return (
     <AnimationRevealPage disabled>
@@ -302,10 +373,9 @@ export default function AdminEckPage() {
 
                 <PanelRoot as="form" onSubmit={handleSave}>
                   <Toolbar>
-                    <SecondaryBtn type="button" onClick={addDay}>
-                      <PlusIcon tw="w-5 h-5" />
-                      Add Day
-                    </SecondaryBtn>
+                    <span tw="text-sm text-gray-600">
+                      Source for today: <strong>{previewToday.source === "override" ? "date override" : previewToday.source === "weekly" ? "weekly schedule" : "none (closed)"}</strong>
+                    </span>
                     <div tw="flex flex-wrap gap-2">
                       <SecondaryBtn type="button" onClick={handleLogout}>
                         Sign Out
@@ -325,135 +395,213 @@ export default function AdminEckPage() {
                     ))}
 
                   <div tw="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-                    <PanelCard>
-                      {days.length === 0 && (
-                        <Muted>
-                          No days yet. Click “Add Day” and set the date and intervals (e.g., walk-in April 20 → 11:00–19:00).
+                    <div tw="flex flex-col gap-6">
+                      <PanelCard>
+                        <div tw="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                          <span tw="text-base font-bold text-gray-900">Weekly Schedule</span>
+                        </div>
+                        <Muted tw="mb-2">
+                          Set the recurring hours for each day of the week. Toggle a day off to mark it as closed by default.
                         </Muted>
-                      )}
-                      {days.map((day, dIdx) => (
-                        <DayCard key={dIdx}>
-                          <div tw="flex flex-wrap items-center justify-between gap-2">
-                            <span tw="text-sm font-bold text-gray-800">Day {dIdx + 1}</span>
-                            <DangerBtn type="button" onClick={() => removeDay(dIdx)}>
-                              <TrashIcon tw="w-4 h-4" />
-                              Remove Day
-                            </DangerBtn>
-                          </div>
-                          <Row>
-                            <div>
-                              <Label>Date</Label>
-                              <Input
-                                tw="mt-1 px-4 py-3"
-                                type="date"
-                                value={day.date || ""}
-                                onChange={(e) => updateDay(dIdx, { date: e.target.value })}
-                                required
-                              />
-                            </div>
-                            <div>
-                              <Label>Optional note</Label>
-                              <TextArea
-                                placeholder="E.g., Cash only"
-                                value={day.note || ""}
-                                onChange={(e) => updateDay(dIdx, { note: e.target.value })}
-                              />
-                            </div>
-                          </Row>
-                          <Label tw="mt-4 block">Intervals (max. 4)</Label>
-                          {(day.intervals || []).map((iv, iIdx) => (
-                            <IntervalRow key={iIdx}>
-                              <div>
-                                <Label>Start</Label>
-                                <Input
-                                  tw="mt-1 w-32 px-3 py-2"
-                                  type="time"
-                                  value={iv.start || ""}
-                                  onChange={(e) => updateInterval(dIdx, iIdx, { start: e.target.value })}
-                                  required
-                                />
+                        {WEEKDAY_ORDER.map((wd) => {
+                          const key = String(wd);
+                          const entry = weekly[key];
+                          const isOpen = !!entry;
+                          return (
+                            <DayCard key={wd}>
+                              <div tw="flex flex-wrap items-center justify-between gap-2">
+                                <span tw="text-sm font-bold text-gray-800">{weekdayLabel(wd)}</span>
+                                <label tw="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={isOpen}
+                                    onChange={(e) => setWeeklyOpen(wd, e.target.checked)}
+                                  />
+                                  {isOpen ? "Open" : "Closed"}
+                                </label>
                               </div>
-                              <div>
-                                <Label>End</Label>
-                                <Input
-                                  tw="mt-1 w-32 px-3 py-2"
-                                  type="time"
-                                  value={iv.end || ""}
-                                  onChange={(e) => updateInterval(dIdx, iIdx, { end: e.target.value })}
-                                  required
-                                />
-                              </div>
-                              <DangerBtn type="button" tw="mb-1" onClick={() => removeInterval(dIdx, iIdx)}>
-                                Remove interval
-                              </DangerBtn>
-                            </IntervalRow>
-                          ))}
-                          <SecondaryBtn
-                            type="button"
-                            tw="mt-3"
-                            onClick={() => addInterval(dIdx)}
-                            disabled={(day.intervals || []).length >= 4}
-                          >
-                            <PlusIcon tw="w-4 h-4" />
-                            Add interval
+                              {isOpen && (
+                                <>
+                                  <Label tw="mt-3 block">Optional note</Label>
+                                  <TextArea
+                                    placeholder="E.g., Members only after 5 PM"
+                                    value={entry.note || ""}
+                                    onChange={(e) => updateWeeklyNote(wd, e.target.value)}
+                                  />
+                                  <Label tw="mt-3 block">Intervals (max. 4)</Label>
+                                  {(entry.intervals || []).map((iv, iIdx) => (
+                                    <IntervalRow key={iIdx}>
+                                      <div>
+                                        <Label>Start</Label>
+                                        <Input
+                                          tw="mt-1 w-32 px-3 py-2"
+                                          type="time"
+                                          value={iv.start || ""}
+                                          onChange={(e) => updateWeeklyInterval(wd, iIdx, { start: e.target.value })}
+                                          required
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label>End</Label>
+                                        <Input
+                                          tw="mt-1 w-32 px-3 py-2"
+                                          type="time"
+                                          value={iv.end || ""}
+                                          onChange={(e) => updateWeeklyInterval(wd, iIdx, { end: e.target.value })}
+                                          required
+                                        />
+                                      </div>
+                                      <DangerBtn type="button" tw="mb-1" onClick={() => removeWeeklyInterval(wd, iIdx)}>
+                                        Remove interval
+                                      </DangerBtn>
+                                    </IntervalRow>
+                                  ))}
+                                  <SecondaryBtn
+                                    type="button"
+                                    tw="mt-3"
+                                    onClick={() => addWeeklyInterval(wd)}
+                                    disabled={(entry.intervals || []).length >= 4}
+                                  >
+                                    <PlusIcon tw="w-4 h-4" />
+                                    Add interval
+                                  </SecondaryBtn>
+                                </>
+                              )}
+                            </DayCard>
+                          );
+                        })}
+                      </PanelCard>
+
+                      <PanelCard>
+                        <div tw="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                          <span tw="text-base font-bold text-gray-900">Date Overrides</span>
+                          <SecondaryBtn type="button" onClick={addDay}>
+                            <PlusIcon tw="w-5 h-5" />
+                            Add Override
                           </SecondaryBtn>
-                        </DayCard>
-                      ))}
-                    </PanelCard>
+                        </div>
+                        <Muted tw="mb-2">
+                          Use these for special hours, holidays, or to close a day that's normally open. Leave intervals empty to mark a day as closed.
+                        </Muted>
+                        {days.length === 0 && (
+                          <Muted>No overrides yet. The weekly schedule above will apply to every day.</Muted>
+                        )}
+                        {days.map((day, dIdx) => {
+                          const closedOverride = (day.intervals || []).length === 0;
+                          return (
+                            <DayCard key={dIdx}>
+                              <div tw="flex flex-wrap items-center justify-between gap-2">
+                                <span tw="text-sm font-bold text-gray-800">Override {dIdx + 1}</span>
+                                <DangerBtn type="button" onClick={() => removeDay(dIdx)}>
+                                  <TrashIcon tw="w-4 h-4" />
+                                  Remove Override
+                                </DangerBtn>
+                              </div>
+                              <Row>
+                                <div>
+                                  <Label>Date</Label>
+                                  <Input
+                                    tw="mt-1 px-4 py-3"
+                                    type="date"
+                                    value={day.date || ""}
+                                    onChange={(e) => updateDay(dIdx, { date: e.target.value })}
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Optional note</Label>
+                                  <TextArea
+                                    placeholder="E.g., Closed for private event"
+                                    value={day.note || ""}
+                                    onChange={(e) => updateDay(dIdx, { note: e.target.value })}
+                                  />
+                                </div>
+                              </Row>
+                              <Label tw="mt-4 block">Intervals (max. 4)</Label>
+                              {closedOverride && (
+                                <Muted tw="text-xs italic">
+                                  No intervals — this date will show as <strong>Closed today</strong>.
+                                </Muted>
+                              )}
+                              {(day.intervals || []).map((iv, iIdx) => (
+                                <IntervalRow key={iIdx}>
+                                  <div>
+                                    <Label>Start</Label>
+                                    <Input
+                                      tw="mt-1 w-32 px-3 py-2"
+                                      type="time"
+                                      value={iv.start || ""}
+                                      onChange={(e) => updateInterval(dIdx, iIdx, { start: e.target.value })}
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End</Label>
+                                    <Input
+                                      tw="mt-1 w-32 px-3 py-2"
+                                      type="time"
+                                      value={iv.end || ""}
+                                      onChange={(e) => updateInterval(dIdx, iIdx, { end: e.target.value })}
+                                      required
+                                    />
+                                  </div>
+                                  <DangerBtn type="button" tw="mb-1" onClick={() => removeInterval(dIdx, iIdx)}>
+                                    Remove interval
+                                  </DangerBtn>
+                                </IntervalRow>
+                              ))}
+                              <SecondaryBtn
+                                type="button"
+                                tw="mt-3"
+                                onClick={() => addInterval(dIdx)}
+                                disabled={(day.intervals || []).length >= 4}
+                              >
+                                <PlusIcon tw="w-4 h-4" />
+                                Add interval
+                              </SecondaryBtn>
+                            </DayCard>
+                          );
+                        })}
+                      </PanelCard>
+                    </div>
 
                     <div>
                       <PreviewTitle>Preview (as shown on the site)</PreviewTitle>
                       <PreviewShell tw="mt-2">
-                        {!previewPick && (
-                          <p tw="text-sm text-gray-300 text-center">
-                            No content to show yet. Once you add a day with hours, the red section on the homepage will
-                            update automatically.
-                          </p>
-                        )}
-                        {previewPick && (
-                          <>
-                            <PreviewHeading>
-                              {previewIsToday ? "Walk-In Racing Today" : "Upcoming Walk-In"}
-                            </PreviewHeading>
-                            <PreviewDescription>
-                              {previewPick.day.note?.trim()
-                                ? previewPick.day.note.trim()
-                                : "First come, first served. No reservation required. Just show up and race!"}
-                            </PreviewDescription>
-                            <PreviewStatsRow>
-                              {previewIsToday ? (
-                                <>
-                                  <div>
-                                    <PreviewStatValue>{previewHoursText}</PreviewStatValue>
-                                    <PreviewStatKey>Today's Hours</PreviewStatKey>
-                                  </div>
-                                  <div>
-                                    <PreviewStatValue>{previewStatus}</PreviewStatValue>
-                                    <PreviewStatKey>Status</PreviewStatKey>
-                                  </div>
-                                  <div>
-                                    <PreviewStatValue>8+</PreviewStatValue>
-                                    <PreviewStatKey>Min. Age</PreviewStatKey>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div>
-                                    <PreviewStatValue>{formatBannerDate(previewPick.day.date, "en")}</PreviewStatValue>
-                                    <PreviewStatKey>Next Date</PreviewStatKey>
-                                  </div>
-                                  <div>
-                                    <PreviewStatValue>{previewHoursText}</PreviewStatValue>
-                                    <PreviewStatKey>Hours</PreviewStatKey>
-                                  </div>
-                                  <div>
-                                    <PreviewStatValue>8+</PreviewStatValue>
-                                    <PreviewStatKey>Min. Age</PreviewStatKey>
-                                  </div>
-                                </>
-                              )}
-                            </PreviewStatsRow>
-                          </>
+                        <PreviewHeading>Walk-In Racing Today</PreviewHeading>
+                        <PreviewDescription>{previewDescription}</PreviewDescription>
+                        <PreviewStatsRow>
+                          <div>
+                            <PreviewStatValue>{previewHoursText}</PreviewStatValue>
+                            <PreviewStatKey>Today's Hours</PreviewStatKey>
+                          </div>
+                          <div>
+                            <PreviewStatValue>{previewStatus}</PreviewStatValue>
+                            <PreviewStatKey>Status</PreviewStatKey>
+                          </div>
+                          <div>
+                            <PreviewStatValue>8+</PreviewStatValue>
+                            <PreviewStatKey>Min. Age</PreviewStatKey>
+                          </div>
+                        </PreviewStatsRow>
+                        {previewWeekly.length > 0 && (
+                          <div tw="mt-5 pt-4 border-t border-gray-700 text-center">
+                            <p tw="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-gray-400">
+                              Regular Hours
+                            </p>
+                            <ul tw="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-200 list-none p-0">
+                              {previewWeekly.map((item) => (
+                                <li key={item.weekday} tw="flex items-baseline gap-2">
+                                  <span tw="font-bold uppercase tracking-wide">{item.label}</span>
+                                  <span>
+                                    {item.intervals
+                                      .map((iv) => formatIntervalLine(iv.start, iv.end, "en"))
+                                      .join(" / ")}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </PreviewShell>
                     </div>

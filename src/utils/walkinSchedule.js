@@ -77,6 +77,67 @@ function toMinutes(hhmm) {
   return h * 60 + m;
 }
 
+/** Weekday number 0=Sunday..6=Saturday for the given YYYY-MM-DD interpreted in Moncton TZ. */
+export function monctonWeekday(dateStr = monctonDateString()) {
+  if (!dateStr) return new Date().getDay();
+  const [y, M, d] = dateStr.split("-").map(Number);
+  const utcNoon = new Date(Date.UTC(y, M - 1, d, 12, 0, 0));
+  const wd = new Intl.DateTimeFormat("en-US", {
+    timeZone: ECK_TIMEZONE,
+    weekday: "short",
+  }).format(utcNoon);
+  const map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return map[wd] ?? 0;
+}
+
+/**
+ * Resolve which schedule applies today.
+ * Override (date in `days`) takes precedence over the recurring `weekly` entry.
+ * @returns {{ source: 'override'|'weekly'|'none', intervals: {start:string,end:string}[], note: string }}
+ */
+export function resolveTodaySchedule(data, todayStr = monctonDateString()) {
+  const days = Array.isArray(data?.days) ? data.days : [];
+  const override = days.find((d) => d && d.date === todayStr);
+  if (override) {
+    return {
+      source: "override",
+      intervals: Array.isArray(override.intervals) ? override.intervals : [],
+      note: typeof override.note === "string" ? override.note : "",
+    };
+  }
+  const weekday = monctonWeekday(todayStr);
+  const entry = data?.weekly ? data.weekly[String(weekday)] : null;
+  if (entry && Array.isArray(entry.intervals) && entry.intervals.length > 0) {
+    return {
+      source: "weekly",
+      intervals: entry.intervals,
+      note: typeof entry.note === "string" ? entry.note : "",
+    };
+  }
+  return { source: "none", intervals: [], note: "" };
+}
+
+/**
+ * Returns the recurring weekly entries that have at least one interval, ordered
+ * starting from `todayWeekday` and wrapping (so today is shown first).
+ * Each item: { weekday: 0..6, label: localized short weekday, intervals: [...] }
+ */
+export function getWeeklySummary(weekly, locale, todayWeekday = monctonWeekday()) {
+  if (!weekly || typeof weekly !== "object") return [];
+  const loc = locale === "fr" ? "fr-CA" : "en-CA";
+  const fmt = new Intl.DateTimeFormat(loc, { weekday: "short", timeZone: "UTC" });
+  const items = [];
+  for (let offset = 0; offset < 7; offset += 1) {
+    const wd = (todayWeekday + offset) % 7;
+    const entry = weekly[String(wd)];
+    if (!entry || !Array.isArray(entry.intervals) || entry.intervals.length === 0) continue;
+    const refDate = new Date(Date.UTC(2024, 11, 1 + wd, 12, 0, 0));
+    const label = fmt.format(refDate).replace(".", "");
+    items.push({ weekday: wd, label, intervals: entry.intervals });
+  }
+  return items;
+}
+
 /**
  * Determines if the track is currently open, based on today's intervals.
  * @returns {'open'|'closed'}
