@@ -35,7 +35,7 @@ const SocialLink = styled.a`
 
 const CopyrightAndCompanyInfoRow = tw.div`pb-0 text-sm font-normal flex flex-col sm:flex-row justify-between items-center`
 const CopyrightNotice = tw.div``
-const CompanyInfo = tw.div``
+const CompanyInfo = tw.div`text-center`
 
 const Divider = tw.div`my-8 border-b-2 border-gray-800`;
 
@@ -53,8 +53,6 @@ const defaultFooterLabels = {
   minigp: "Mini Grand Prix",
   birthdays: "Birthday Parties",
   corporate: "Corporate Events",
-  privacy: "Privacy Policy",
-  terms: "Terms of Service",
   waiver: "Waiver",
   directions: "Get Directions",
   copyright: "© 2025 ECK Racing. All Rights Reserved.",
@@ -121,12 +119,6 @@ export default ({ footerLabels = null }) => {
             <ColumnHeading>{L.legal}</ColumnHeading>
             <LinkList>
               <LinkListItem>
-                <Link href="#">{L.privacy}</Link>
-              </LinkListItem>
-              <LinkListItem>
-                <Link href="#">{L.terms}</Link>
-              </LinkListItem>
-              <LinkListItem>
                 <Link 
                 href="https://cakcmp.speedwaiver.com/wdvli" 
                 target="_blank" 
@@ -141,7 +133,7 @@ export default ({ footerLabels = null }) => {
             <ColumnHeading>{L.contact}</ColumnHeading>
             <LinkList>
               <LinkListItem>
-                +1 (506) 555-0123
+                +1 (506) 383-7223
               </LinkListItem>
               <LinkListItem>
                 <Link href="mailto:eastcoastkarting@gmail.com">eastcoastkarting@gmail.com</Link>

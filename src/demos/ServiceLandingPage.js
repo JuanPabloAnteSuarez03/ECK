@@ -270,8 +270,6 @@ export default function ServiceLandingPage() {
     minigp: t("footer.minigp"),
     birthdays: t("footer.birthdays"),
     corporate: t("footer.corporate"),
-    privacy: t("footer.privacy"),
-    terms: t("footer.terms"),
     waiver: t("footer.waiver"),
     directions: t("footer.directions"),
     copyright: t("footer.copyright"),
