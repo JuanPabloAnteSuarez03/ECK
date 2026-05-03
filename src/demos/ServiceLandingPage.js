@@ -4,11 +4,11 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { useI18n } from "context/LanguageContext.js";
 import {
+  collapseWeeklySummary,
   currentStatus,
   formatIntervalLine,
   getWeeklySummary,
   monctonDateString,
-  monctonWeekday,
   resolveTodaySchedule,
 } from "utils/walkinSchedule.js";
 
@@ -101,24 +101,32 @@ export default function ServiceLandingPage() {
   }, [walkinData, locale, t]);
 
   const weeklyFooter = useMemo(() => {
-    const summary = getWeeklySummary(walkinData?.weekly || {}, locale, monctonWeekday());
+    const summary = getWeeklySummary(walkinData?.weekly || {}, locale);
     if (!summary.length) return null;
+    const groups = collapseWeeklySummary(summary);
     return (
       <div tw="text-center">
         <p tw="text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-300">
           {t("walkIn.regularHours")}
         </p>
         <ul tw="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm sm:text-base text-gray-100 list-none p-0">
-          {summary.map((item) => (
-            <li key={item.weekday} tw="flex items-baseline gap-2">
-              <span tw="font-bold uppercase tracking-wide">{item.label}</span>
-              <span>
-                {item.intervals
-                  .map((iv) => formatIntervalLine(iv.start, iv.end, locale))
-                  .join(" / ")}
-              </span>
-            </li>
-          ))}
+          {groups.map((g, idx) => {
+            const dayLabel = g.startLabel === g.endLabel ? g.startLabel : `${g.startLabel}-${g.endLabel}`;
+            return (
+              <li key={idx} tw="flex items-baseline gap-2">
+                <span tw="font-bold uppercase tracking-wide">{dayLabel}</span>
+                {g.isClosed ? (
+                  <span tw="italic text-gray-300">{t("walkIn.dayClosed")}</span>
+                ) : (
+                  <span>
+                    {g.intervals
+                      .map((iv) => formatIntervalLine(iv.start, iv.end, locale))
+                      .join(" / ")}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     );

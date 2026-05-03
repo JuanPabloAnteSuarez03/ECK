@@ -118,24 +118,68 @@ export function resolveTodaySchedule(data, todayStr = monctonDateString()) {
 }
 
 /**
- * Returns the recurring weekly entries that have at least one interval, ordered
- * starting from `todayWeekday` and wrapping (so today is shown first).
+ * Returns all 7 weekdays in calendar order (Mon..Sun). Closed days have
+ * `intervals: []`. The whole list is returned only when at least one day
+ * is open; otherwise an empty array is returned so callers can hide the
+ * block entirely.
  * Each item: { weekday: 0..6, label: localized short weekday, intervals: [...] }
+ *
+ * The third arg is kept for backwards compatibility but ignored: the order is
+ * always calendar (Mon..Sun) so that consecutive days collapse cleanly into
+ * ranges like "MON-FRI".
  */
-export function getWeeklySummary(weekly, locale, todayWeekday = monctonWeekday()) {
+// eslint-disable-next-line no-unused-vars
+export function getWeeklySummary(weekly, locale, _todayWeekday) {
   if (!weekly || typeof weekly !== "object") return [];
+  const hasAnyOpen = Object.values(weekly).some(
+    (entry) => entry && Array.isArray(entry.intervals) && entry.intervals.length > 0
+  );
+  if (!hasAnyOpen) return [];
   const loc = locale === "fr" ? "fr-CA" : "en-CA";
   const fmt = new Intl.DateTimeFormat(loc, { weekday: "short", timeZone: "UTC" });
+  const calendarOrder = [1, 2, 3, 4, 5, 6, 0]; // Mon..Sun
   const items = [];
-  for (let offset = 0; offset < 7; offset += 1) {
-    const wd = (todayWeekday + offset) % 7;
+  for (const wd of calendarOrder) {
     const entry = weekly[String(wd)];
-    if (!entry || !Array.isArray(entry.intervals) || entry.intervals.length === 0) continue;
+    const intervals =
+      entry && Array.isArray(entry.intervals) && entry.intervals.length > 0 ? entry.intervals : [];
     const refDate = new Date(Date.UTC(2024, 11, 1 + wd, 12, 0, 0));
     const label = fmt.format(refDate).replace(".", "");
-    items.push({ weekday: wd, label, intervals: entry.intervals });
+    items.push({ weekday: wd, label, intervals });
   }
   return items;
+}
+
+/**
+ * Collapses consecutive items (in the order received) that share the exact
+ * same schedule into ranges. Two days are considered the same when their
+ * intervals match (or when both are closed).
+ * @param {{ weekday: number, label: string, intervals: {start:string,end:string}[] }[]} items
+ * @returns {{ startLabel: string, endLabel: string, isClosed: boolean, intervals: {start:string,end:string}[] }[]}
+ */
+export function collapseWeeklySummary(items) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const keyFor = (item) =>
+    item.intervals.length === 0
+      ? "closed"
+      : item.intervals.map((iv) => `${iv.start}-${iv.end}`).join(",");
+  const groups = [];
+  for (const item of items) {
+    const key = keyFor(item);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) {
+      last.endLabel = item.label;
+    } else {
+      groups.push({
+        key,
+        startLabel: item.label,
+        endLabel: item.label,
+        isClosed: item.intervals.length === 0,
+        intervals: item.intervals,
+      });
+    }
+  }
+  return groups;
 }
 
 /**

@@ -11,11 +11,11 @@ import { ReactComponent as PlusIcon } from "feather-icons/dist/icons/plus-circle
 import { ReactComponent as TrashIcon } from "feather-icons/dist/icons/trash-2.svg";
 import {
   ECK_TIMEZONE,
+  collapseWeeklySummary,
   currentStatus,
   formatIntervalLine,
   getWeeklySummary,
   monctonDateString,
-  monctonWeekday,
   resolveTodaySchedule,
 } from "utils/walkinSchedule.js";
 
@@ -117,9 +117,9 @@ export default function AdminEckPage() {
   }, [refreshSession]);
 
   const todayStr = monctonDateString();
-  const todayWeekday = monctonWeekday(todayStr);
   const previewToday = useMemo(() => resolveTodaySchedule({ weekly, days }, todayStr), [weekly, days, todayStr]);
-  const previewWeekly = useMemo(() => getWeeklySummary(weekly, "en", todayWeekday), [weekly, todayWeekday]);
+  const previewWeekly = useMemo(() => getWeeklySummary(weekly, "en"), [weekly]);
+  const previewWeeklyGroups = useMemo(() => collapseWeeklySummary(previewWeekly), [previewWeekly]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -590,16 +590,24 @@ export default function AdminEckPage() {
                               Regular Hours
                             </p>
                             <ul tw="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-200 list-none p-0">
-                              {previewWeekly.map((item) => (
-                                <li key={item.weekday} tw="flex items-baseline gap-2">
-                                  <span tw="font-bold uppercase tracking-wide">{item.label}</span>
-                                  <span>
-                                    {item.intervals
-                                      .map((iv) => formatIntervalLine(iv.start, iv.end, "en"))
-                                      .join(" / ")}
-                                  </span>
-                                </li>
-                              ))}
+                              {previewWeeklyGroups.map((g, idx) => {
+                                const dayLabel =
+                                  g.startLabel === g.endLabel ? g.startLabel : `${g.startLabel}-${g.endLabel}`;
+                                return (
+                                  <li key={idx} tw="flex items-baseline gap-2">
+                                    <span tw="font-bold uppercase tracking-wide">{dayLabel}</span>
+                                    {g.isClosed ? (
+                                      <span tw="italic text-gray-400">Closed</span>
+                                    ) : (
+                                      <span>
+                                        {g.intervals
+                                          .map((iv) => formatIntervalLine(iv.start, iv.end, "en"))
+                                          .join(" / ")}
+                                      </span>
+                                    )}
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </div>
                         )}
